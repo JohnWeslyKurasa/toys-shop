@@ -128,6 +128,10 @@ app.post('/api/payments/verify', async (req, res) => {
 });
 
 // Start server listening
-app.listen(PORT, () => {
-  console.log(`🚀 Express backend server listening on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' || require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Express backend server listening on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
