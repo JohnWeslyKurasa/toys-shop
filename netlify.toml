@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[context.production.environment]
+  # Example: set Node version (optional)
+  NODE_VERSION = "18"
+
+# Redirects (optional) - uncomment if you need SPA fallback
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200
