@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Check if the user is the owner of the document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Check if the authenticated user has an 'admin' role in their user profile document
+    function isAdmin() {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && (isOwner(userId) || isAdmin());
+    }
+
+    // Orders collection rules
+    match /orders/{orderId} {
+      allow create: if isSignedIn();
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+    
+    // Global fallback rule for any other collection
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
