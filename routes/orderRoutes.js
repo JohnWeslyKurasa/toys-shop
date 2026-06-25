@@ -23,4 +23,10 @@ router.get('/', adminOnly, getAllOrders);
 // PUT /api/orders/:orderId/status  — update order / payment status (admin only)
 router.put('/:orderId/status', adminOnly, updateOrderStatus);
 
+// POST /api/orders/razorpay/create  — create Razorpay order
+router.post('/razorpay/create', require('../controllers/orderController').createRazorpayOrder);
+
+// POST /api/orders/razorpay/verify  — verify Razorpay payment
+router.post('/razorpay/verify', require('../controllers/orderController').verifyRazorpayPayment);
+
 module.exports = router;

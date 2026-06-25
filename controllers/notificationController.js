@@ -83,6 +83,26 @@ exports.getPublicNotifications = async (req, res) => {
 // Get logged-in user's notifications
 exports.getNotifications = async (req, res) => {
   try {
+    // 1. Ensure user has all recent global notifications
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const globalNotifs = await Notification.find({
+      targetAudience: 'All Users',
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+
+    const existingNotifs = await UserNotification.find({ userId: req.user._id });
+    const existingIds = existingNotifs.map(un => un.notificationId.toString());
+
+    const missingGlobal = globalNotifs.filter(n => !existingIds.includes(n._id.toString()));
+    if (missingGlobal.length > 0) {
+      await UserNotification.insertMany(missingGlobal.map(n => ({
+        userId: req.user._id,
+        notificationId: n._id
+      })));
+    }
+
+    // 2. Fetch all user notifications
     const userNotifications = await UserNotification.find({ userId: req.user._id })
       .populate('notificationId')
       .sort({ createdAt: -1 })
@@ -137,9 +157,29 @@ exports.markAllAsRead = async (req, res) => {
 // Get unread badge count
 exports.getUnreadCount = async (req, res) => {
   try {
+    // 1. Ensure user has all recent global notifications
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const globalNotifs = await Notification.find({
+      targetAudience: 'All Users',
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+
+    const existingNotifs = await UserNotification.find({ userId: req.user._id });
+    const existingIds = existingNotifs.map(un => un.notificationId.toString());
+
+    const missingGlobal = globalNotifs.filter(n => !existingIds.includes(n._id.toString()));
+    if (missingGlobal.length > 0) {
+      await UserNotification.insertMany(missingGlobal.map(n => ({
+        userId: req.user._id,
+        notificationId: n._id
+      })));
+    }
+
     const count = await UserNotification.countDocuments({ userId: req.user._id, isRead: false });
     res.status(200).json({ success: true, count });
   } catch (error) {
+    console.error('Error fetching unread count:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

@@ -716,8 +716,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 8. Initialize interactive cursor sparkle trail
-  initCursorTrail();
+  // 8. Interactive cursor sparkle trail disabled
 
   // 9. Add floating background decorative toys
   initFloatingDecorations();
@@ -750,65 +749,7 @@ window.addEventListener("DOMContentLoaded", () => {
   window.observeFadeElements();
 });
 
-// Interactive Cursor Sparkle Trail Manager
-function initCursorTrail() {
-  let lastMousePos = { x: 0, y: 0 };
-
-  // Mousemove sparkle generation disabled as requested
-  // window.addEventListener("mousemove", (e) => { ... });
-
-  window.addEventListener("click", (e) => {
-    // Generate burst of sparkles on click
-    for (let i = 0; i < 12; i++) {
-      createSparkle(e.pageX, e.pageY, true);
-    }
-  });
-}
-
-function createSparkle(x, y, isBurst) {
-  const particle = document.createElement("div");
-  particle.className = "sparkle-particle";
-  
-  if (Math.random() > 0.5) {
-    particle.classList.add("star-particle");
-  }
-  if (isBurst) {
-    particle.classList.add("click-burst");
-  }
-
-  // Soft warm theme accents (yellow, orange, pink, cyan, green)
-  const colors = ["#FFEB3B", "#FF9100", "#FF4081", "#00E5FF", "#00E676"];
-  particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-
-  const size = isBurst ? Math.random() * 12 + 6 : Math.random() * 8 + 4;
-  particle.style.width = `${size}px`;
-  particle.style.height = `${size}px`;
-
-  particle.style.left = `${x}px`;
-  particle.style.top = `${y}px`;
-
-  if (isBurst) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 80 + 35;
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed;
-    
-    particle.animate([
-      { transform: `translate(-50%, -50%) translate(0px, 0px) scale(1)`, opacity: 1 },
-      { transform: `translate(-50%, -50%) translate(${vx}px, ${vy}px) scale(0.1)`, opacity: 0 }
-    ], {
-      duration: 600,
-      easing: "cubic-bezier(0.1, 0.8, 0.3, 1)",
-      fill: "forwards"
-    });
-  }
-
-  document.body.appendChild(particle);
-
-  setTimeout(() => {
-    particle.remove();
-  }, isBurst ? 600 : 800);
-}
+// Interactive Cursor Sparkle Trail Manager - Completely Removed as requested
 
 // Background Floating Toy Icons Generator
 function initFloatingDecorations() {
@@ -2197,7 +2138,7 @@ function openQuickView(productId) {
       modalBuyNowBtn.addEventListener("click", () => {
         const quantity = parseInt(qtyVal.value);
         buyNow(prod.id, quantity);
-        closeModal();
+        // Do not call closeModal() here because buyNow() already handles opening the checkout/login modal
       });
     }
   }

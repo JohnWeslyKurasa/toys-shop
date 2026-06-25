@@ -218,21 +218,25 @@ function renderNotifications(notifications) {
 
   body.innerHTML = '';
   notifications.forEach(un => {
-    const n = un.notificationId;
+    // Robust mapping: fallback to `un` if `un.notificationId` is missing or is just a string ID
+    const n = (un.notificationId && typeof un.notificationId === 'object') ? un.notificationId : un;
+    const isRead = un.isRead !== undefined ? un.isRead : false;
+    
     const item = document.createElement('div');
-    item.className = `notification-item ${!un.isRead ? 'unread' : ''}`;
+    item.className = `notification-item ${!isRead ? 'unread' : ''}`;
     
     // Icon based on type
     let iconSvg = '<svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,19.93C7.05,19.43 4,16.05 4,12C4,7.95 7.05,4.57 11,4.07V19.93M13,4.07C16.95,4.57 20,7.95 20,12C20,16.05 16.95,19.43 13,19.93V4.07Z"/></svg>';
-    if (n.type === 'Flash sales' || n.type === 'Discounts') {
+    const type = n.type || 'General announcements';
+    if (type === 'Flash sales' || type === 'Discounts') {
       iconSvg = '<svg viewBox="0 0 24 24"><path d="M12,15.39L8.24,17.66L9.23,13.38L5.91,10.5L10.29,10.13L12,6.09L13.71,10.13L18.09,10.5L14.77,13.38L15.76,17.66M22,9.24L14.81,8.63L12,2L9.19,8.63L2,9.24L7.45,13.97L5.82,21L12,17.27L18.18,21L16.54,13.97L22,9.24Z"/></svg>';
     }
 
     item.innerHTML = `
       <div class="notif-icon">${iconSvg}</div>
       <div class="notif-content">
-        <div class="notif-title">${n.title}</div>
-        <div class="notif-message">${n.message}</div>
+        <div class="notif-title">${n.title || 'Notification'}</div>
+        <div class="notif-message">${n.message || ''}</div>
         <div class="notif-time">${new Date(n.createdAt).toLocaleString()}</div>
       </div>
     `;

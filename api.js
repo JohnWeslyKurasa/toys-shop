@@ -148,7 +148,7 @@ export async function apiUpdateOrderStatus(orderId, status) {
  * Create a Razorpay Order
  */
 export async function apiCreateRazorpayOrder(amount, currency = 'INR') {
-  const res = await fetch(`${BASE_URL}/payment/razorpay-order`, {
+  const res = await fetch(`${BASE_URL}/orders/razorpay/create`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ amount, currency }),
@@ -160,7 +160,7 @@ export async function apiCreateRazorpayOrder(amount, currency = 'INR') {
  * Verify Razorpay Payment
  */
 export async function apiVerifyPayment(paymentData) {
-  const res = await fetch(`${BASE_URL}/payment/verify`, {
+  const res = await fetch(`${BASE_URL}/orders/razorpay/verify`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(paymentData),

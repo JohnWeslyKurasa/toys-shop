@@ -5,7 +5,7 @@ const Order = require('../models/Order');
 // Initialize Razorpay
 // In production, these should be in your .env file
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_replace_me',
+  key_id: process.env.VITE_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_test_replace_me',
   key_secret: process.env.RAZORPAY_KEY_SECRET || 'replace_me_secret'
 });
 
