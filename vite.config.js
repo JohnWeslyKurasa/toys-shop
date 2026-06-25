@@ -3,11 +3,18 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   server: {
     proxy: {
-      '/api': {
+      // Match /api/ routes only — NOT /api.js file imports
+      '^/api/': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
+      },
+      // Proxy socket.io
+      '/socket.io': {
+        target: 'http://localhost:3000',
+        ws: true,
       }
     }
   }
 });
+

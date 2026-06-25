@@ -1,20 +1,19 @@
 // Mother & Toddler - Main Application Logic
-import { 
-  signUpUser, 
-  loginUser, 
-  logoutUser, 
-  resetPassword, 
-  getUserProfile, 
-  updateUserProfile,
-  auth, 
-  onAuthStateChanged,
-  placeOrder,
-  getAllOrders,
-  updateOrderStatus,
-  getCustomerOrders,
-  ensureDefaultAdminAccount,
-  saveOrderDirectly
-} from "./firebase-service.js";
+import { initNotifications, setNotificationAuthToken } from './notifications.js';
+// MongoDB/Express API service (only backend used)
+import {
+  apiLogin,
+  apiRegister,
+  apiLogout,
+  apiPlaceOrder,
+  apiGetMyOrders,
+  apiGetAllOrders,
+  apiUpdateOrderStatus,
+  getStoredUser,
+  getJwt,
+  apiCreateRazorpayOrder,
+  apiVerifyPayment,
+} from "./api.js";
 
 // Default product database in Indian Rupees (₹) with ageGroup properties
 const DEFAULT_PRODUCTS = [
@@ -353,6 +352,34 @@ let searchQuery = "";
 let slideshowInterval = null;
 let selectedPaymentMethod = "card";
 
+// ── Shared UI helpers (module-scope so all functions can use them) ──────────
+function renderLoggedInUI(displayName) {
+  setNotificationAuthToken(getJwt());
+  const section = document.getElementById("userAuthSection");
+  if (!section) return;
+  section.innerHTML = `
+    <span style="color: var(--dark-brown); margin-right: 8px;">Hi, ${displayName}!</span>
+    <a href="#" id="myOrdersBtn" style="color: var(--light-brown); text-decoration: none; font-weight: 700; margin-right: 12px; border-right: 1.5px solid rgba(93, 64, 55, 0.15); padding-right: 12px;">My Orders</a>
+    <a href="#" id="userLogoutBtn" style="color: var(--accent-red); text-decoration: none;">Logout</a>
+  `;
+}
+
+function renderLoggedOutUI() {
+  setNotificationAuthToken(null);
+  const section = document.getElementById("userAuthSection");
+  if (!section) return;
+  section.innerHTML = `
+    <a href="#" id="userLoginRegisterBtn" style="color: var(--light-brown); text-decoration: none;">Sign In / Register</a>
+  `;
+  const btn = document.getElementById("userLoginRegisterBtn");
+  if (btn) {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openModal(document.getElementById("userAuthModal"));
+    });
+  }
+}
+
 // DOM Elements
 const elements = {
   loader: document.getElementById("loader"),
@@ -569,14 +596,14 @@ const CATEGORY_DETAILS = {
 
 // Initialize Application
 window.addEventListener("DOMContentLoaded", () => {
-  // 0. Ensure default admin account exists
-  ensureDefaultAdminAccount();
-
   // 1. Hide Loader
   setTimeout(() => {
     elements.loader.style.opacity = "0";
     elements.loader.style.visibility = "hidden";
   }, 600);
+
+  // Initialize Notifications
+  initNotifications();
 
   // 2. Render categories lists
   renderCategoryGroups();
@@ -588,14 +615,44 @@ window.addEventListener("DOMContentLoaded", () => {
   // 4. Load & render cart & wishlist states
   updateBadges();
 
-  // 5. Scroll navigation effect
+  // 5. Scroll navigation effect & auto-hide
+  let lastScrollY = window.scrollY;
+  const mobileBottomNav = document.getElementById("mobileBottomNav");
+  
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 50) {
+    const currentScrollY = window.scrollY;
+    
+    // Shadow effect on top nav
+    if (currentScrollY > 50) {
       elements.header.classList.add("scrolled");
     } else {
       elements.header.classList.remove("scrolled");
     }
-  });
+
+    // Slide up/down navbars on scroll direction (threshold to prevent glitching at top)
+    if (currentScrollY > 60 && currentScrollY > lastScrollY) {
+      // Scrolling down
+      elements.header.classList.add("nav-hidden-top");
+      if (mobileBottomNav) mobileBottomNav.classList.add("nav-hidden-bottom");
+    } else if (currentScrollY < lastScrollY || currentScrollY < 10) {
+      // Scrolling up or at very top
+      elements.header.classList.remove("nav-hidden-top");
+      if (mobileBottomNav) mobileBottomNav.classList.remove("nav-hidden-bottom");
+    }
+    
+    lastScrollY = currentScrollY;
+  }, { passive: true });
+
+  // Handle bottom navigation active states
+  if (mobileBottomNav) {
+    const bottomNavItems = mobileBottomNav.querySelectorAll('.bottom-nav-item');
+    bottomNavItems.forEach(item => {
+      item.addEventListener('click', function() {
+        bottomNavItems.forEach(nav => nav.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  }
 
   // Setup Event Listeners
   setupEventListeners();
@@ -604,44 +661,18 @@ window.addEventListener("DOMContentLoaded", () => {
   renderHeroSlideshow();
   initHeroSlideshow();
 
-  // Firebase Auth State Observer
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // User is logged in
-      const profile = await getUserProfile(user.uid);
-      const displayName = profile ? profile.name : (user.displayName || "Parent");
-      const userRole = profile ? profile.role : "user";
-      
-      elements.userAuthSection.innerHTML = `
-        <span style="color: var(--dark-brown); margin-right: 8px;">Hi, ${displayName}!</span>
-        <a href="#" id="myOrdersBtn" style="color: var(--light-brown); text-decoration: none; font-weight: 700; margin-right: 12px; border-right: 1.5px solid rgba(93, 64, 55, 0.15); padding-right: 12px;">My Orders</a>
-        <a href="#" id="userLogoutBtn" style="color: var(--accent-red); text-decoration: none;">Logout</a>
-      `;
-      
-      // If user has admin role, keep dashboard access available through login
-      if (userRole === "admin") {
-        /* admin can open dashboard after sign in */
-      }
-    } else {
-      // User is logged out
-      elements.userAuthSection.innerHTML = `
-        <a href="#" id="userLoginRegisterBtn" style="color: var(--light-brown); text-decoration: none;">Sign In / Register</a>
-      `;
-      
-      // Bind click handler back to login button
-      const loginRegisterBtn = document.getElementById("userLoginRegisterBtn");
-      if (loginRegisterBtn) {
-        loginRegisterBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          openModal(elements.userAuthModal);
-        });
-      }
-    }
-  });
+  // ── Auth: MongoDB JWT session only ──────────────────────────────────────
+  const mongoUser = getStoredUser();
+  if (mongoUser) {
+    renderLoggedInUI(mongoUser.name || mongoUser.email || "Parent");
+  } else {
+    renderLoggedOutUI();
+  }
   
   // Expose key globally so HTML event triggers work
   window.toggleWishlist = toggleWishlist;
   window.addToCart = addToCart;
+  window.buyNow = buyNow;
   window.removeFromCart = removeFromCart;
   window.updateCartQuantity = updateCartQuantity;
   window.moveWishlistToCart = moveWishlistToCart;
@@ -693,20 +724,38 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // 10. Initialize navigation scroll spy and smooth scroll
   initNavigationScrollSpy();
+
+  // 11. Mobile-First Fade in on scroll
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = 1;
+        entry.target.style.transform = 'translateY(0)';
+        fadeObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+  
+  window.observeFadeElements = () => {
+    document.querySelectorAll('.product-card:not(.fade-observed), .category-card:not(.fade-observed)').forEach(el => {
+      el.classList.add('fade-observed');
+      el.style.opacity = 0;
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      fadeObserver.observe(el);
+    });
+  };
+
+  // Initial call for static HTML elements
+  window.observeFadeElements();
 });
 
 // Interactive Cursor Sparkle Trail Manager
 function initCursorTrail() {
   let lastMousePos = { x: 0, y: 0 };
 
-  window.addEventListener("mousemove", (e) => {
-    // Distance check to throttle sparkle generation
-    const dist = Math.hypot(e.clientX - lastMousePos.x, e.clientY - lastMousePos.y);
-    if (dist > 18) {
-      createSparkle(e.pageX, e.pageY, false);
-      lastMousePos = { x: e.clientX, y: e.clientY };
-    }
-  });
+  // Mousemove sparkle generation disabled as requested
+  // window.addEventListener("mousemove", (e) => { ... });
 
   window.addEventListener("click", (e) => {
     // Generate burst of sparkles on click
@@ -1079,9 +1128,11 @@ function setupEventListeners() {
     elements.tabManageProducts.classList.add("active");
     elements.tabManageSlides.classList.remove("active");
     elements.tabManageOrders.classList.remove("active");
+    if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.productsDashboardSection.style.display = "flex";
     elements.slidesDashboardSection.style.display = "none";
     elements.ordersDashboardSection.style.display = "none";
+    if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewProductBtn.style.display = "block";
     elements.addNewSlideBtn.style.display = "none";
     elements.slideFormPanel.style.display = "none";
@@ -1091,9 +1142,11 @@ function setupEventListeners() {
     elements.tabManageSlides.classList.add("active");
     elements.tabManageProducts.classList.remove("active");
     elements.tabManageOrders.classList.remove("active");
+    if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.slidesDashboardSection.style.display = "flex";
     elements.productsDashboardSection.style.display = "none";
     elements.ordersDashboardSection.style.display = "none";
+    if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewSlideBtn.style.display = "block";
     elements.addNewProductBtn.style.display = "none";
     elements.productFormPanel.style.display = "none";
@@ -1104,9 +1157,11 @@ function setupEventListeners() {
     elements.tabManageOrders.classList.add("active");
     elements.tabManageProducts.classList.remove("active");
     elements.tabManageSlides.classList.remove("active");
+    if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.ordersDashboardSection.style.display = "flex";
     elements.productsDashboardSection.style.display = "none";
     elements.slidesDashboardSection.style.display = "none";
+    if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewProductBtn.style.display = "none";
     elements.addNewSlideBtn.style.display = "none";
     elements.productFormPanel.style.display = "none";
@@ -1197,12 +1252,9 @@ function setupEventListeners() {
   elements.userAuthSection.addEventListener("click", async (e) => {
     if (e.target.id === "userLogoutBtn") {
       e.preventDefault();
-      try {
-        await logoutUser();
-        showToast("Signed out successfully.", "success");
-      } catch (err) {
-        showToast("Error signing out: " + err.message, "error");
-      }
+      apiLogout();
+      renderLoggedOutUI();
+      showToast("Signed out successfully.", "success");
     } else if (e.target.id === "myOrdersBtn") {
       e.preventDefault();
       openModal(elements.customerOrdersModal);
@@ -1242,115 +1294,91 @@ function setupEventListeners() {
     elements.btnUserTabLogin.click();
   });
 
-  // User Login Form Submit
+  // User Login Form Submit — MongoDB only
   elements.userLoginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = elements.userLoginEmail.value.trim();
     const password = elements.userLoginPassword.value;
     const loginRole = elements.btnUserRoleAdmin.classList.contains("active") ? "admin" : "user";
-    
-    // Set loading state
-    elements.userSubmitLoginBtn.disabled = true;
-    elements.userSubmitLoginBtn.textContent = "Authenticating...";
-    
-    try {
-      const user = await loginUser(email, password);
-      const profile = await getUserProfile(user.uid);
-      const userRole = profile?.role || user.role || "user";
 
-      if (loginRole === "admin" && userRole !== "admin") {
-        await logoutUser();
-        throw { message: "Admin credentials required. Please sign in as a parent or use an admin account.", code: "auth/insufficient-permission" };
+    if (!email || !password) {
+      showToast("Please enter your email and password.", "error");
+      return;
+    }
+
+    elements.userSubmitLoginBtn.disabled = true;
+    elements.userSubmitLoginBtn.textContent = "Signing In...";
+
+    try {
+      const result = await apiLogin(email, password);
+      const user = result.user;
+
+      if (loginRole === "admin" && user.role !== "admin") {
+        apiLogout();
+        throw new Error("This account does not have admin access.");
       }
 
+      renderLoggedInUI(user.name || user.email);
+
       if (loginRole === "admin") {
-        showToast("Admin login successful!", "success");
+        showToast("Admin login successful! 👋", "success");
         closeModal();
         openOwnerDashboard();
       } else {
-        showToast("Logged in successfully!", "success");
+        showToast(`Welcome back, ${user.name || "Parent"}! 🎉`, "success");
         closeModal();
       }
 
       elements.userLoginForm.reset();
     } catch (err) {
-      let friendlyMsg = err.message || "Login failed. Please try again.";
-      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
-        friendlyMsg = "Invalid email address or password.";
-      } else if (err.code === "auth/invalid-email") {
-        friendlyMsg = "Please enter a valid email address.";
-      }
-      showToast(friendlyMsg, "error");
+      showToast(err.message || "Login failed. Please check your email and password.", "error");
     } finally {
       elements.userSubmitLoginBtn.disabled = false;
       elements.userSubmitLoginBtn.textContent = "Sign In";
     }
   });
 
-  // User Register Form Submit
+  // User Register Form Submit — MongoDB only
   elements.userRegisterForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = elements.userRegisterName.value.trim();
     const email = elements.userRegisterEmail.value.trim();
     const phone = elements.userRegisterPhone.value.trim();
     const password = elements.userRegisterPassword.value;
-    
+
+    if (!name || !email || !password) {
+      showToast("Please fill in all required fields.", "error");
+      return;
+    }
     if (password.length < 6) {
       showToast("Password must be at least 6 characters.", "error");
       return;
     }
-    
-    // Set loading state
+
     elements.userSubmitRegisterBtn.disabled = true;
-    elements.userSubmitRegisterBtn.textContent = "Registering Account...";
-    
+    elements.userSubmitRegisterBtn.textContent = "Creating Account...";
+
     try {
-      await signUpUser(name, email, phone, password);
-      showToast("Registration successful! Welcome", "success");
+      const result = await apiRegister(name, email, phone, password);
+      const user = result.user;
+      renderLoggedInUI(user.name || user.email);
+      showToast(`Account created! Welcome, ${user.name}! 🎉`, "success");
       closeModal();
       elements.userRegisterForm.reset();
     } catch (err) {
-      let friendlyMsg = err.message;
-      if (err.code === "auth/email-already-in-use") {
-        friendlyMsg = "This email address is already registered.";
-      } else if (err.code === "auth/invalid-email") {
-        friendlyMsg = "Please enter a valid email address.";
-      } else if (err.code === "auth/weak-password") {
-        friendlyMsg = "Password should be at least 6 characters.";
-      }
-      showToast(friendlyMsg, "error");
+      let msg = err.message || "Registration failed.";
+      if (msg.toLowerCase().includes("already")) msg = "This email is already registered. Please sign in.";
+      showToast(msg, "error");
     } finally {
       elements.userSubmitRegisterBtn.disabled = false;
       elements.userSubmitRegisterBtn.textContent = "Register Account";
     }
   });
 
-  // Forgot Password Form Submit
+  // Forgot Password Form Submit — not available with MongoDB (no email service)
   elements.userForgotForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = elements.userForgotEmail.value.trim();
-    
-    // Set loading state
-    elements.userSubmitForgotBtn.disabled = true;
-    elements.userSubmitForgotBtn.textContent = "Sending Email...";
-    
-    try {
-      await resetPassword(email);
-      showToast("Password reset link sent! Check your inbox", "success");
-      elements.btnUserTabLogin.click();
-      elements.userForgotForm.reset();
-    } catch (err) {
-      let friendlyMsg = err.message;
-      if (err.code === "auth/user-not-found") {
-        friendlyMsg = "No account found with this email address.";
-      } else if (err.code === "auth/invalid-email") {
-        friendlyMsg = "Please enter a valid email address.";
-      }
-      showToast(friendlyMsg, "error");
-    } finally {
-      elements.userSubmitForgotBtn.disabled = false;
-      elements.userSubmitForgotBtn.textContent = "Send Reset Link";
-    }
+    showToast("Password reset is not available yet. Please contact support.", "error");
   });
 
   // Search input live handler & autocomplete suggestions
@@ -1431,8 +1459,8 @@ function setupEventListeners() {
       return;
     }
     
-    // Require authentication
-    if (!auth.currentUser) {
+    // Require JWT authentication
+    if (!getJwt()) {
       closeAllDrawers();
       openModal(elements.userAuthModal);
       showToast("Please sign in or register to place your order.", "error");
@@ -1443,11 +1471,12 @@ function setupEventListeners() {
     elements.checkoutBtn.textContent = "Opening Checkout...";
 
     try {
-      const profile = await getUserProfile(auth.currentUser.uid);
-      const name = profile ? profile.name : (auth.currentUser.displayName || "");
-      const phone = profile ? profile.phone : "";
-      const address = profile ? (profile.address || "") : "";
-      
+      // Pre-fill from MongoDB JWT session
+      const mUser = getStoredUser();
+      const name = mUser?.name || "";
+      const phone = mUser?.phone || "";
+      const address = "";
+
       // Pre-fill fields
       elements.checkoutName.value = name;
       elements.checkoutPhone.value = phone;
@@ -1570,37 +1599,38 @@ function setupEventListeners() {
     elements.payMethodCod.style.pointerEvents = "none";
 
     if (selectedPaymentMethod === "cod") {
-      // Direct placement for Cash on Delivery (COD)
+      // Cash on Delivery — save to MongoDB
       try {
         elements.checkoutPayBtn.innerHTML = `Placing Order...`;
-        
-        const orderId = await placeOrder(
-          auth.currentUser.uid,
-          name,
-          auth.currentUser.email,
-          phone,
-          cart,
-          grandTotal,
-          address,
-          "COD",
-          "Pending COD",
-          deliveryDate
-        );
 
-        // Update profile
-        try {
-          await updateUserProfile(auth.currentUser.uid, {
-            name: name,
-            phone: phone,
-            address: address
-          });
-        } catch (profileErr) {
-          console.warn("Failed to update user profile address:", profileErr);
-        }
+        const mappedItems = cart.map(item => {
+          const prod = PRODUCTS.find(p => p.id === item.productId || p.id === Number(item.productId));
+          return {
+            productId: String(item.productId),
+            name: prod?.name || "Unknown Product",
+            price: prod?.price || 0,
+            quantity: item.quantity || 1,
+            image: prod?.image || ""
+          };
+        });
 
-        showToast(`Order placed successfully! Invoice: ${orderId}`, "success");
+        const mongoResult = await apiPlaceOrder({
+          items: mappedItems,
+          totalAmount: grandTotal,
+          paymentStatus: "pending",
+          shippingAddress: {
+            fullName: name,
+            addressLine1: address,
+            city: "-",
+            state: "-",
+            pincode: "-",
+            phone: phone
+          }
+        });
 
-        // Clear Cart & Reset UI
+        const orderId = mongoResult.order._id;
+        showToast(`🎉 Order placed! Invoice: ${orderId}`, "success");
+
         cart = [];
         localStorage.setItem("mt_cart", JSON.stringify(cart));
         renderCart();
@@ -1616,103 +1646,61 @@ function setupEventListeners() {
         elements.checkoutPayBtn.innerHTML = `Initiating Secure Payment...`;
 
         // Step 1: Create order on backend Express server
-        const response = await fetch("/api/payments/order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: grandTotal })
-        });
-        const orderResult = await response.json();
+        const orderResult = await apiCreateRazorpayOrder(grandTotal, "INR");
         
         if (!orderResult.success) {
           throw new Error(orderResult.message || "Failed to create Razorpay order");
         }
 
-        const razorpayOrder = orderResult.order;
+        const razorpayOrder = orderResult;
 
-        // Step 2: Configure Razorpay Checkout options
+        // Step 2: Save the "Pending" order to our MongoDB so we have a dbOrderId
+        const mappedItems = cart.map(item => {
+          const prod = PRODUCTS.find(p => p.id === item.productId || p.id === Number(item.productId));
+          return {
+            productId: String(item.productId),
+            name: prod?.name || "Unknown Product",
+            price: prod?.price || 0,
+            quantity: item.quantity || 1,
+            image: prod?.image || ""
+          };
+        });
+
+        const mongoResult = await apiPlaceOrder({
+          items: mappedItems,
+          totalAmount: grandTotal,
+          paymentStatus: "pending",
+          shippingAddress: {
+            fullName: name,
+            addressLine1: address,
+            city: "-", state: "-", pincode: "-", phone: phone
+          }
+        });
+        
+        const dbOrderId = mongoResult.order._id;
+
+        // Step 3: Configure Razorpay Checkout options
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_T51p8zDGOIWJgK",
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_replace_me",
           amount: razorpayOrder.amount,
-          currency: "INR",
+          currency: razorpayOrder.currency,
           name: "Mother & Toddler Shop",
           description: "Premium Baby Products & Toys",
-          order_id: razorpayOrder.id,
+          order_id: razorpayOrder.orderId,
           handler: async function (paymentRes) {
             try {
               elements.checkoutPayBtn.innerHTML = `Verifying Payment Signature...`;
-              
-              // Generate client order details to write to Firestore on verification success
-              const localOrderId = "MT-" + Math.floor(100000 + Math.random() * 900000);
-              const productsArray = Array.isArray(cart) ? cart : [];
-              const mappedProducts = productsArray.map(item => {
-                const prod = PRODUCTS.find(p => p.id === item.productId || p.id === Number(item.productId));
-                return {
-                  productId: String(item.productId),
-                  name: prod?.name || "Unknown Product",
-                  price: prod?.price || 0,
-                  quantity: item.quantity || 1,
-                  image: prod?.image || ""
-                };
+
+              // Step 4: Send payment results to backend for verification
+              const verifyResult = await apiVerifyPayment({
+                razorpay_order_id: paymentRes.razorpay_order_id,
+                razorpay_payment_id: paymentRes.razorpay_payment_id,
+                razorpay_signature: paymentRes.razorpay_signature,
+                dbOrderId: dbOrderId
               });
 
-              const orderDetails = {
-                orderId: localOrderId,
-                userId: auth.currentUser.uid,
-                customerName: name,
-                customerEmail: auth.currentUser.email,
-                customerPhone: phone,
-                shippingAddress: address,
-                paymentMethod: selectedPaymentMethod.toUpperCase(),
-                paymentStatus: "Paid",
-                deliveryDate,
-                products: mappedProducts,
-                items: mappedProducts,
-                totalAmount: grandTotal,
-                subtotal: grandTotal,
-                status: "Pending"
-              };
-
-              // Step 3: Send payment results to backend for verification and write
-              const verifyResponse = await fetch("/api/payments/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  razorpay_order_id: paymentRes.razorpay_order_id,
-                  razorpay_payment_id: paymentRes.razorpay_payment_id,
-                  razorpay_signature: paymentRes.razorpay_signature,
-                  orderData: orderDetails
-                })
-              });
-
-              const verifyResult = await verifyResponse.json();
               if (verifyResult.success) {
-                // Client-side fallback order write if backend could not write it to DB
-                if (verifyResult.fallbackClientWrite) {
-                  try {
-                    await saveOrderDirectly(orderDetails.orderId, orderDetails);
-                    console.log("Client-side fallback order write successful ✅");
-                  } catch (clientWriteErr) {
-                    console.error("Client-side order write failed:", clientWriteErr);
-                    showToast("Order saved locally with warning: " + clientWriteErr.message, "warning");
-                  }
-                }
-
-                // Update profile shipping details
-                try {
-                  await updateUserProfile(auth.currentUser.uid, {
-                    name: name,
-                    phone: phone,
-                    address: address
-                  });
-                } catch (err) {
-                  console.warn("Failed to update profile:", err);
-                }
-
-                if (verifyResult.warning) {
-                  showToast(verifyResult.warning, "warning");
-                } else {
-                  showToast(`Order placed successfully! Invoice: ${verifyResult.orderId}`, "success");
-                }
+                showToast(`🎉 Payment successful! Invoice: ${dbOrderId}`, "success");
 
                 // Clear Cart & Reset UI
                 cart = [];
@@ -1731,12 +1719,10 @@ function setupEventListeners() {
           },
           prefill: {
             name: name,
-            email: auth.currentUser.email,
+            email: getStoredUser()?.email || "",
             contact: phone
           },
-          theme: {
-            color: "#5d4037"
-          },
+          theme: { color: "#FB8C00" },
           modal: {
             ondismiss: function () {
               showToast("Payment checkout cancelled", "error");
@@ -1913,7 +1899,7 @@ function renderProducts() {
   }
 
   elements.productsGrid.innerHTML = filtered.map(prod => {
-    const isWished = wishlist.includes(prod.id);
+    const isWished = wishlist.includes(prod.id) || wishlist.includes(String(prod.id)) || wishlist.includes(Number(prod.id));
     
     // Calculate discount percentage
     let discountBadge = "";
@@ -1925,14 +1911,14 @@ function renderProducts() {
     }
 
     return `
-      <div class="product-card" style="animation: fadeIn 0.5s ease forwards; ${!prod.inStock ? 'opacity: 0.7;' : ''}">
+      <div class="product-card" onclick="openQuickView(${prod.id})" style="cursor: pointer; animation: fadeIn 0.5s ease forwards; ${!prod.inStock ? 'opacity: 0.7;' : ''}">
         <div class="product-badges">
           ${prod.isNew ? '<span class="badge-tag badge-new">NEW</span>' : ''}
           ${prod.isSale ? '<span class="badge-tag badge-sale">SALE</span>' : ''}
           ${discountBadge}
           ${!prod.inStock ? '<span class="badge-tag" style="background-color: #E0E0E0; color: #757575;">OUT OF STOCK</span>' : ''}
         </div>
-        <button class="wishlist-toggle-btn ${isWished ? 'wished' : ''}" onclick="toggleWishlist(${prod.id})" title="Add to Wishlist">
+        <button class="wishlist-toggle-btn ${isWished ? 'wished' : ''}" onclick="event.stopPropagation(); toggleWishlist(${prod.id})" title="Add to Wishlist">
           <svg viewBox="0 0 24 24">
             <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.41,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.59,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>
           </svg>
@@ -1957,18 +1943,14 @@ function renderProducts() {
               ${prod.originalPrice ? `<span class="product-original-price">₹${prod.originalPrice.toLocaleString('en-IN')}</span>` : ''}
               ${prod.originalPrice && prod.originalPrice > prod.price ? `<span class="discount-tag-orange">(${Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)}% OFF)</span>` : ''}
             </div>
-            ${prod.inStock ? `
-              <button class="add-to-cart-btn" onclick="addToCart(${prod.id}, 1)" title="Add to Cart">
-                <svg viewBox="0 0 24 24">
-                  <path d="M11 9H9V11H7V9H5V7H7V5H9V7H11V9M17 18C15.9 18 15 18.9 15 20S15.9 22 17 22 19 21.1 19 20 18.1 18 17 18M7 18C5.9 18 5 18.9 5 20S5.9 22 7 22 9 21.1 9 20 8.1 18 7 18M18.9 10.3C18.8 10.1 18.6 10 18.4 10H7.2L6.3 8H19.6C20.1 8 20.6 8.4 20.6 9C20.6 9.2 20.5 9.4 20.4 9.6L17.2 15.4C16.9 16 16.2 16.5 15.4 16.5H8.5L7.1 13.6L15.4 13.6C15.8 13.6 16.1 13.4 16.3 13.1L18.9 10.3Z"/>
-                </svg>
-              </button>
-            ` : `<span style="font-size: 0.8rem; font-weight: 700; color: var(--accent-red);">Sold Out</span>`}
           </div>
+          ${!prod.inStock ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--accent-red); margin-top: 8px; display: block;">Sold Out</span>` : ''}
         </div>
       </div>
     `;
   }).join("");
+
+  if (window.observeFadeElements) window.observeFadeElements();
 }
 
 // Render shopping cart list items inside the sliding cart drawer in Rupees
@@ -2073,6 +2055,26 @@ function addToCart(productId, qty) {
   showToast(`Added ${prod.name} to Cart!`, "success");
 }
 
+// Buy Now function - adds to cart and immediately triggers checkout
+function buyNow(productId, qty = 1) {
+  const prod = PRODUCTS.find(p => p.id === productId);
+  if (!prod) return;
+
+  const existing = cart.find(item => item.productId === productId);
+  if (existing) {
+    existing.quantity += qty;
+  } else {
+    cart.push({ productId, quantity: qty });
+  }
+
+  localStorage.setItem("mt_cart", JSON.stringify(cart));
+  updateBadges();
+  renderCart();
+  
+  // Trigger checkout directly
+  elements.checkoutBtn.click();
+}
+
 // Remove item from cart
 function removeFromCart(productId) {
   cart = cart.filter(item => item.productId !== productId);
@@ -2101,11 +2103,15 @@ function updateCartQuantity(productId, qty) {
 
 // Toggle product in wishlist
 function toggleWishlist(productId) {
-  const index = wishlist.indexOf(productId);
+  const indexStr = wishlist.indexOf(String(productId));
+  const indexNum = wishlist.indexOf(Number(productId));
   const prod = PRODUCTS.find(p => p.id === productId);
 
-  if (index > -1) {
-    wishlist.splice(index, 1);
+  if (indexStr > -1) {
+    wishlist.splice(indexStr, 1);
+    showToast("Removed from wishlist.", "error");
+  } else if (indexNum > -1) {
+    wishlist.splice(indexNum, 1);
     showToast("Removed from wishlist.", "error");
   } else {
     wishlist.push(productId);
@@ -2157,14 +2163,15 @@ function openQuickView(productId) {
       </div>
       <p class="modal-desc">${prod.description}</p>
       
-      <div class="modal-actions">
+      <div class="modal-actions" style="display: flex; gap: 10px; align-items: stretch; margin-top: 15px;">
         ${prod.inStock ? `
           <div class="modal-qty">
             <button id="modalQtyDec">-</button>
             <input type="text" id="modalQtyVal" value="1" readonly>
             <button id="modalQtyInc">+</button>
           </div>
-          <button class="btn btn-primary" id="modalAddToCartBtn">Add to Cart</button>
+          <button class="btn" id="modalAddToCartBtn" style="flex: 1; background: var(--soft-yellow); color: var(--dark-brown); font-weight: 700; border-radius: 30px; border: 2px solid var(--light-orange); transition: transform 0.2s;">Add to Cart</button>
+          <button class="btn" id="modalBuyNowBtn" style="flex: 1; background: linear-gradient(to right, var(--deep-orange), var(--light-orange)); color: white; font-weight: 700; border-radius: 30px; border: none; box-shadow: var(--shadow-md); transition: transform 0.2s;">Buy Now</button>
         ` : `<span style="font-weight: 700; color: var(--accent-red); font-size: 1.1rem; padding: 6px 0;">Product Currently Sold Out</span>`}
       </div>
     </div>
@@ -2185,6 +2192,14 @@ function openQuickView(productId) {
       addToCart(prod.id, quantity);
       closeModal();
     });
+    const modalBuyNowBtn = document.getElementById("modalBuyNowBtn");
+    if (modalBuyNowBtn) {
+      modalBuyNowBtn.addEventListener("click", () => {
+        const quantity = parseInt(qtyVal.value);
+        buyNow(prod.id, quantity);
+        closeModal();
+      });
+    }
   }
 
   elements.drawerOverlay.classList.add("active");
@@ -2346,7 +2361,7 @@ function closeModal() {
 }
 
 // Toast notification function
-function showToast(message, type = "success") {
+export function showToast(message, type = "success") {
   const toast = document.createElement("div");
   toast.className = `toast toast-${type}`;
   toast.innerHTML = `
@@ -2460,7 +2475,17 @@ function initHeroSlideshow() {
     });
   });
 
-  // Start the rotation
+  const heroSlider = document.querySelector(".hero-slider-container");
+  if (heroSlider) {
+    heroSlider.addEventListener("mouseenter", () => {
+      clearInterval(slideshowInterval);
+    });
+    heroSlider.addEventListener("mouseleave", () => {
+      startSlideshow();
+    });
+  }
+
+  showSlide(0);
   startSlideshow();
 }
 
@@ -2676,18 +2701,30 @@ function deleteSlide(id) {
   }
 }
 
-// Render orders table in Owner Dashboard
+// Render orders table in Owner Dashboard — MongoDB only
 async function renderAdminOrdersTable() {
   elements.adminOrdersTableBody.innerHTML = `
     <tr>
-      <td colspan="6" style="text-align: center; padding: 24px; color: var(--light-brown);">
-        Loading orders database...
+      <td colspan="8" style="text-align: center; padding: 24px; color: var(--light-brown);">
+        Loading orders...
       </td>
     </tr>
   `;
 
   try {
-    const orders = await getAllOrders();
+    const mongoResult = await apiGetAllOrders();
+    const orders = (mongoResult.orders || []).map(o => ({
+      orderId: o._id,
+      createdAt: o.createdAt,
+      customerName: o.user?.name || "Customer",
+      customerEmail: o.user?.email || "-",
+      customerPhone: o.shippingAddress?.phone || "-",
+      items: o.items || [],
+      totalAmount: o.totalAmount || 0,
+      paymentStatus: o.paymentStatus === "paid" ? "Paid" : (o.paymentStatus || "Pending"),
+      status: o.status || "pending"
+    }));
+
     if (orders.length === 0) {
       elements.adminOrdersTableBody.innerHTML = `
         <tr>
@@ -2700,41 +2737,29 @@ async function renderAdminOrdersTable() {
     }
 
     elements.adminOrdersTableBody.innerHTML = orders.map(order => {
-      const date = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : order.createdDate?.seconds ? new Date(order.createdDate.seconds * 1000).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
+      const date = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
       const itemsHtml = order.items.map(item => `${item.name} (x${item.quantity})`).join("<br>");
-      
-      const statusOptions = ["Pending", "Shipped", "Delivered"];
-      const dropdownOptions = statusOptions.map(opt => 
-        `<option value="${opt}" ${order.status === opt ? "selected" : ""}>${opt}</option>`
+      const statusOptions = ["pending", "processing", "shipped", "delivered", "cancelled"];
+      const displayStatus = (order.status || "pending").toLowerCase();
+      const dropdownOptions = statusOptions.map(opt =>
+        `<option value="${opt}" ${displayStatus === opt ? "selected" : ""}>${opt.charAt(0).toUpperCase() + opt.slice(1)}</option>`
       ).join("");
 
       return `
         <tr style="border-bottom: 1px solid rgba(93, 64, 55, 0.05);">
-          <td style="padding: 12px; font-weight: 700; color: var(--dark-brown);">
-            ${order.orderId}
-          </td>
-          <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown); white-space: nowrap;">
-            ${date}
-          </td>
+          <td style="padding: 12px; font-weight: 700; color: var(--dark-brown); font-size: 0.8rem; word-break: break-all;">${order.orderId}</td>
+          <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown); white-space: nowrap;">${date}</td>
           <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown);">
             <strong>Name:</strong> ${order.customerName}<br>
             <strong>Email:</strong> ${order.customerEmail}<br>
-            <strong>Phone:</strong> ${order.customerPhone || "-"}
+            <strong>Phone:</strong> ${order.customerPhone}
           </td>
-          <td style="padding: 12px; font-size: 0.85rem; color: var(--dark-brown); max-width: 250px;">
-            ${itemsHtml}
-          </td>
-          <td style="padding: 12px; font-weight: 700; color: var(--dark-brown);">
-            ₹${order.subtotal.toLocaleString('en-IN')}
-          </td>
-          <td style="padding: 12px; font-size: 0.85rem; color: ${order.paymentStatus === 'Paid' ? 'green' : 'var(--dark-brown)'}; font-weight: 700;">
-            ${order.paymentStatus || 'Pending'}
-          </td>
-          <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown); white-space: nowrap;">
-            ${order.deliveryDate || 'TBD'}
-          </td>
+          <td style="padding: 12px; font-size: 0.85rem; color: var(--dark-brown); max-width: 250px;">${itemsHtml}</td>
+          <td style="padding: 12px; font-weight: 700; color: var(--dark-brown);">₹${order.totalAmount.toLocaleString('en-IN')}</td>
+          <td style="padding: 12px; font-size: 0.85rem; color: ${order.paymentStatus === 'Paid' ? 'green' : 'var(--dark-brown)'}; font-weight: 700;">${order.paymentStatus}</td>
+          <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown);">TBD</td>
           <td style="padding: 12px; text-align: center;">
-            <select class="admin-stock-badge" style="height: auto; padding: 6px 12px; border-radius: var(--border-radius-sm); font-family: var(--font-body); font-size: 0.85rem; cursor: pointer; outline: none; border: 1.5px solid var(--cream);" 
+            <select class="admin-stock-badge" style="height: auto; padding: 6px 12px; border-radius: var(--border-radius-sm); font-family: var(--font-body); font-size: 0.85rem; cursor: pointer; outline: none; border: 1.5px solid var(--cream);"
                     onchange="changeOrderStatus('${order.orderId}', this.value)">
               ${dropdownOptions}
             </select>
@@ -2745,7 +2770,7 @@ async function renderAdminOrdersTable() {
   } catch (err) {
     elements.adminOrdersTableBody.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align: center; padding: 24px; color: var(--accent-red); font-weight: 700;">
+        <td colspan="8" style="text-align: center; padding: 24px; color: var(--accent-red); font-weight: 700;">
           Failed to load orders: ${err.message}
         </td>
       </tr>
@@ -2753,35 +2778,48 @@ async function renderAdminOrdersTable() {
   }
 }
 
-// Global order status change handler
+// Global order status change handler — MongoDB only
 async function changeOrderStatus(orderId, newStatus) {
   try {
-    await updateOrderStatus(orderId, newStatus);
-    showToast(`Order ${orderId} updated to: ${newStatus}`, "success");
+    await apiUpdateOrderStatus(orderId, newStatus);
+    showToast(`Order updated to: ${newStatus}`, "success");
   } catch (err) {
     showToast("Failed to update status: " + err.message, "error");
   }
 }
 
-// Render customer order history
+// Render customer order history — MongoDB only
 async function renderCustomerOrders() {
-  if (!auth.currentUser) return;
-  
+  if (!getJwt()) {
+    showToast("Please log in to view your orders.", "error");
+    return;
+  }
+
   elements.customerOrdersTableBody.innerHTML = `
     <tr>
-      <td colspan="5" style="text-align: center; padding: 24px; color: var(--light-brown);">
+      <td colspan="7" style="text-align: center; padding: 24px; color: var(--light-brown);">
         Loading your order history...
       </td>
     </tr>
   `;
 
   try {
-    const orders = await getCustomerOrders(auth.currentUser.uid);
+    const mongoResult = await apiGetMyOrders();
+    const orders = (mongoResult.orders || []).map(o => ({
+      orderId: o._id,
+      createdAt: o.createdAt,
+      items: o.items || [],
+      totalAmount: o.totalAmount || 0,
+      paymentStatus: o.paymentStatus === "paid" ? "Paid" : (o.paymentStatus || "Pending"),
+      status: o.status || "pending",
+      shippingAddress: o.shippingAddress || null
+    }));
+
     if (orders.length === 0) {
       elements.customerOrdersTableBody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align: center; padding: 24px; color: var(--light-brown);">
-            You haven't placed any orders yet.
+          <td colspan="8" style="text-align: center; padding: 24px; color: var(--light-brown);">
+            You haven't placed any orders yet. Start shopping! 🛍️
           </td>
         </tr>
       `;
@@ -2790,15 +2828,21 @@ async function renderCustomerOrders() {
 
     elements.customerOrdersTableBody.innerHTML = orders.map(order => {
       const date = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : order.createdDate?.seconds ? new Date(order.createdDate.seconds * 1000).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
-      const itemsHtml = order.items.map(item => `${item.name} (x${item.quantity})`).join("<br>");
+      const itemsHtml = (order.items || []).map(item => `${item.name} (x${item.quantity})`).join("<br>");
       
+      const addressHtml = order.shippingAddress 
+        ? `${order.shippingAddress.fullName || '-'}<br>${order.shippingAddress.phone || '-'}<br>${order.shippingAddress.addressLine1 || '-'}`
+        : "-";
+        
+      const displayStatus = (order.status || "pending");
       let statusColor = "var(--light-brown)";
-      if (order.status === "Shipped") statusColor = "orange";
-      if (order.status === "Delivered") statusColor = "green";
+      if (["shipped", "Shipped"].includes(displayStatus)) statusColor = "orange";
+      if (["delivered", "Delivered"].includes(displayStatus)) statusColor = "green";
+      if (["cancelled", "Cancelled"].includes(displayStatus)) statusColor = "var(--accent-red)";
 
       return `
         <tr style="border-bottom: 1px solid rgba(93, 64, 55, 0.05);">
-          <td style="padding: 12px; font-weight: 700; color: var(--dark-brown);">
+          <td style="padding: 12px; font-weight: 700; color: var(--dark-brown); font-size: 0.8rem; word-break: break-all;">
             ${order.orderId}
           </td>
           <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown); white-space: nowrap;">
@@ -2807,17 +2851,20 @@ async function renderCustomerOrders() {
           <td style="padding: 12px; font-size: 0.85rem; color: var(--dark-brown); max-width: 250px;">
             ${itemsHtml}
           </td>
+          <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown); max-width: 200px;">
+            ${addressHtml}
+          </td>
           <td style="padding: 12px; font-weight: 700; color: var(--dark-brown);">
-            ₹${order.subtotal.toLocaleString('en-IN')}
+            ₹${(order.totalAmount || 0).toLocaleString('en-IN')}
           </td>
           <td style="padding: 12px; font-size: 0.85rem; color: ${order.paymentStatus === 'Paid' ? 'green' : 'var(--dark-brown)'}; font-weight: 700;">
             ${order.paymentStatus || 'Pending'}
           </td>
           <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown); white-space: nowrap;">
-            ${order.deliveryDate || 'TBD'}
+            TBD
           </td>
-          <td style="padding: 12px; text-align: center; font-weight: 700; color: ${statusColor}; font-size: 0.85rem;">
-            ${order.status || "Pending"}
+          <td style="padding: 12px; text-align: center; font-weight: 700; color: ${statusColor}; font-size: 0.85rem; text-transform: capitalize;">
+            ${displayStatus}
           </td>
         </tr>
       `;
@@ -2825,7 +2872,7 @@ async function renderCustomerOrders() {
   } catch (err) {
     elements.customerOrdersTableBody.innerHTML = `
       <tr>
-        <td colspan="5" style="text-align: center; padding: 24px; color: var(--accent-red); font-weight: 700;">
+        <td colspan="7" style="text-align: center; padding: 24px; color: var(--accent-red); font-weight: 700;">
           Failed to load orders: ${err.message}
         </td>
       </tr>

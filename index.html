@@ -124,6 +124,14 @@
           <span class="badge" id="wishlistBadge">0</span>
         </button>
 
+        <!-- Notification Button -->
+        <button class="icon-btn" id="notificationToggle" title="Notifications" style="display: none;">
+          <svg viewBox="0 0 24 24">
+            <path d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21M19.75,3.19L18.33,4.61C20.04,6.3 21,8.6 21,11H23C23,8.07 21.84,5.25 19.75,3.19M1,11H3C3,8.6 3.96,6.3 5.67,4.61L4.25,3.19C2.16,5.25 1,8.07 1,11Z"/>
+          </svg>
+          <span class="badge" id="notificationBadge" style="display: none;">0</span>
+        </button>
+
         <!-- Cart Button -->
         <button class="icon-btn" id="cartToggle" title="Shopping Cart">
           <svg viewBox="0 0 24 24">
@@ -137,13 +145,14 @@
   </header>
 
   <!-- Hero Slider Section -->
+  <!-- Hero Slider Section -->
   <section class="hero-slider-section">
     <div class="hero-slider-container">
       <!-- Slides -->
       <div class="hero-slides-wrapper" id="heroSlideshow">
         
         <!-- Slide 1: Wooden Toys -->
-        <div class="hero-slide active" style="background: linear-gradient(135deg, #FFFDE7 0%, #FFE082 100%);">
+        <div class="hero-slide active" style="background: linear-gradient(135deg, var(--cream) 0%, var(--soft-yellow) 100%);">
           <div class="hero-slide-grid container">
             <div class="hero-slide-content">
               <span class="slide-badge badge-discount">SPECIAL FESTIVAL OFFER</span>
@@ -151,7 +160,7 @@
               <p class="slide-subtitle">Foster tactile learning, logic, and early motor skills with certified organic wooden stacking blocks and clocks.</p>
               <div class="slide-ctas">
                 <a href="#products" onclick="app.filterCategory('Baby Toys')" class="btn btn-primary">Shop Toys Now</a>
-                <a href="#categories" class="btn btn-secondary">Browse Categories</a>
+                <a href="#categories" class="btn btn-secondary" style="background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 2px solid var(--soft-yellow);">Browse Categories</a>
               </div>
             </div>
             <div class="hero-slide-image animated-hero-illustration" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
@@ -167,7 +176,7 @@
         </div>
 
         <!-- Slide 2: Cotton Ruffle Dress -->
-        <div class="hero-slide" style="background: linear-gradient(135deg, #FFF0F2 0%, #FFCDD2 100%);">
+        <div class="hero-slide" style="background: linear-gradient(135deg, var(--soft-beige) 0%, #FFCDD2 100%);">
           <div class="hero-slide-grid container">
             <div class="hero-slide-content">
               <span class="slide-badge" style="background-color: var(--accent-red); color: white;">SEASONAL CLEARANCE</span>
@@ -175,7 +184,7 @@
               <p class="slide-subtitle">Keep your little one cozy and cool in hypoallergenic, breathable ruffle dresses and swaddle basics.</p>
               <div class="slide-ctas">
                 <a href="#products" onclick="app.filterCategory('Baby Dresses')" class="btn btn-primary" style="background-color: var(--accent-red); color: white;">Explore Outfits</a>
-                <a href="#products" class="btn btn-secondary">Shop All Sale</a>
+                <a href="#products" class="btn btn-secondary" style="background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 2px solid var(--accent-red);">Shop All Sale</a>
               </div>
             </div>
             <div class="hero-slide-image animated-hero-illustration" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
@@ -193,7 +202,7 @@
               <p class="slide-subtitle">Leak-proof, easy-to-hold silicone straw trainer cups designed for your baby's comfortable transition.</p>
               <div class="slide-ctas">
                 <a href="#products" onclick="app.filterCategory('Feeding Accessories')" class="btn btn-primary" style="background-color: #00acc1; color: white;">Shop Feeding Care</a>
-                <a href="#about" class="btn btn-secondary">Learn Our Quality</a>
+                <a href="#about" class="btn btn-secondary" style="background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 2px solid #00acc1;">Learn Our Quality</a>
               </div>
             </div>
             <div class="hero-slide-image animated-hero-illustration" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
@@ -217,77 +226,6 @@
     </div>
   </section>
 
-  <!-- Why Choose Us Section -->
-  <section class="why-choose-us">
-    <div class="container text-center">
-      <div class="section-header">
-        <h2>Why Caring Mothers Choose Us</h2>
-        <p>We craft shopping experiences with premium safety and soft comfort at the core.</p>
-      </div>
-      <div class="features-grid">
-        <!-- Card 1 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg viewBox="0 0 24 24">
-              <path d="M12,2C11.5,2 11,2.19 10.59,2.59L2.59,10.59C1.8,11.37 1.8,12.63 2.59,13.41L10.59,21.41C11.37,22.2 12.63,22.2 13.41,21.41L21.41,13.41C22.2,12.63 22.2,11.37 21.41,10.59L13.41,2.59C13,2.19 12.5,2 12,2M12,4L20,12L12,20L4,12L12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
-            </svg>
-          </div>
-          <h3>Premium Quality</h3>
-          <p>Carefully selected ingredients and fabrics for sensitive skin.</p>
-        </div>
-        <!-- Card 2 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg viewBox="0 0 24 24">
-              <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M10,9.5A1.5,1.5 0 0,1 11.5,11A1.5,1.5 0 0,1 10,12.5A1.5,1.5 0 0,1 8.5,11A1.5,1.5 0 0,1 10,9.5M14,9.5A1.5,1.5 0 0,1 15.5,11A1.5,1.5 0 0,1 14,12.5A1.5,1.5 0 0,1 12.5,11A1.5,1.5 0 0,1 14,9.5M12,14C14,14 15.71,15.05 16.5,16.5H7.5C8.29,15.05 10,14 12,14Z"/>
-            </svg>
-          </div>
-          <h3>Safe for Babies</h3>
-          <p>100% toxin-free, BPA-free plastics, and organic clothing.</p>
-        </div>
-        <!-- Card 3 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg viewBox="0 0 24 24">
-              <path d="M12.75,3C11.66,3 10.65,3.36 9.85,3.97L5.54,7.21C4.58,7.93 4,9.08 4,10.29V17C4,18.66 5.34,20 7,20H17C18.66,20 20,18.66 20,17V10.29C20,9.08 19.42,7.93 18.46,7.21L14.15,3.97C13.35,3.36 12.34,3 11.25,3M12.75,5C13.1,5 13.43,5.12 13.7,5.32L18,8.55C18.6,9 19,9.65 19,10.35V17C19,18.1 18.1,19 17,19H7C5.9,19 5,18.1 5,17V10.35C5,9.65 5.4,9 6,8.55L10.3,5.32C10.57,5.12 10.9,5 11.25,5H12.75M12,8.5A2.5,2.5 0 0,0 9.5,11A2.5,2.5 0 0,0 12,13.5A2.5,2.5 0 0,0 14.5,11A2.5,2.5 0 0,0 12,8.5M12,10A1,1 0 0,1 13,11A1,1 0 0,1 12,12A1,1 0 0,1 11,11A1,1 0 0,1 12,10Z"/>
-            </svg>
-          </div>
-          <h3>Affordable Prices</h3>
-          <p>Premium care shouldn't cost a fortune. Regular value deals.</p>
-        </div>
-        <!-- Card 4 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg viewBox="0 0 24 24">
-              <path d="M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8M17,12V10H19.5L21.36,12H17M3,6H15V15H13.8C13.3,13.8 12.2,13 11,13C9.8,13 8.7,13.8 8.2,15H3V6Z"/>
-            </svg>
-          </div>
-          <h3>Fast Delivery</h3>
-          <p>Super-fast same-day or next-day shipping straight to your doorstep.</p>
-        </div>
-        <!-- Card 5 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg viewBox="0 0 24 24">
-              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.41,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.59,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>
-            </svg>
-          </div>
-          <h3>Trusted by Mothers</h3>
-          <p>Loved and highly rated by 50,000+ happy mothers nationwide.</p>
-        </div>
-        <!-- Card 6 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg viewBox="0 0 24 24">
-              <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.48 17.52,2 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M13.5,9H11V11.5L9.5,10L8,11.5L10.5,14L15,9.5L13.5,9Z"/>
-            </svg>
-          </div>
-          <h3>Easy Returns</h3>
-          <p>Hassle-free 15-day return and exchanges, no questions asked.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- Product Categories Section -->
   <section class="categories" id="categories">
@@ -416,6 +354,78 @@
     </div>
   </section>
 
+  <!-- Why Choose Us Section -->
+  <section class="why-choose-us">
+    <div class="container text-center">
+      <div class="section-header">
+        <h2>Why Caring Mothers Choose Us</h2>
+        <p>We craft shopping experiences with premium safety and soft comfort at the core.</p>
+      </div>
+      <div class="features-grid">
+        <!-- Card 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M12,2C11.5,2 11,2.19 10.59,2.59L2.59,10.59C1.8,11.37 1.8,12.63 2.59,13.41L10.59,21.41C11.37,22.2 12.63,22.2 13.41,21.41L21.41,13.41C22.2,12.63 22.2,11.37 21.41,10.59L13.41,2.59C13,2.19 12.5,2 12,2M12,4L20,12L12,20L4,12L12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+            </svg>
+          </div>
+          <h3>Premium Quality</h3>
+          <p>Carefully selected ingredients and fabrics for sensitive skin.</p>
+        </div>
+        <!-- Card 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M10,9.5A1.5,1.5 0 0,1 11.5,11A1.5,1.5 0 0,1 10,12.5A1.5,1.5 0 0,1 8.5,11A1.5,1.5 0 0,1 10,9.5M14,9.5A1.5,1.5 0 0,1 15.5,11A1.5,1.5 0 0,1 14,12.5A1.5,1.5 0 0,1 12.5,11A1.5,1.5 0 0,1 14,9.5M12,14C14,14 15.71,15.05 16.5,16.5H7.5C8.29,15.05 10,14 12,14Z"/>
+            </svg>
+          </div>
+          <h3>Safe for Babies</h3>
+          <p>100% toxin-free, BPA-free plastics, and organic clothing.</p>
+        </div>
+        <!-- Card 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M12.75,3C11.66,3 10.65,3.36 9.85,3.97L5.54,7.21C4.58,7.93 4,9.08 4,10.29V17C4,18.66 5.34,20 7,20H17C18.66,20 20,18.66 20,17V10.29C20,9.08 19.42,7.93 18.46,7.21L14.15,3.97C13.35,3.36 12.34,3 11.25,3M12.75,5C13.1,5 13.43,5.12 13.7,5.32L18,8.55C18.6,9 19,9.65 19,10.35V17C19,18.1 18.1,19 17,19H7C5.9,19 5,18.1 5,17V10.35C5,9.65 5.4,9 6,8.55L10.3,5.32C10.57,5.12 10.9,5 11.25,5H12.75M12,8.5A2.5,2.5 0 0,0 9.5,11A2.5,2.5 0 0,0 12,13.5A2.5,2.5 0 0,0 14.5,11A2.5,2.5 0 0,0 12,8.5M12,10A1,1 0 0,1 13,11A1,1 0 0,1 12,12A1,1 0 0,1 11,11A1,1 0 0,1 12,10Z"/>
+            </svg>
+          </div>
+          <h3>Affordable Prices</h3>
+          <p>Premium care shouldn't cost a fortune. Regular value deals.</p>
+        </div>
+        <!-- Card 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8M17,12V10H19.5L21.36,12H17M3,6H15V15H13.8C13.3,13.8 12.2,13 11,13C9.8,13 8.7,13.8 8.2,15H3V6Z"/>
+            </svg>
+          </div>
+          <h3>Fast Delivery</h3>
+          <p>Super-fast same-day or next-day shipping straight to your doorstep.</p>
+        </div>
+        <!-- Card 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.41,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.59,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>
+            </svg>
+          </div>
+          <h3>Trusted by Mothers</h3>
+          <p>Loved and highly rated by 50,000+ happy mothers nationwide.</p>
+        </div>
+        <!-- Card 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.48 17.52,2 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M13.5,9H11V11.5L9.5,10L8,11.5L10.5,14L15,9.5L13.5,9Z"/>
+            </svg>
+          </div>
+          <h3>Easy Returns</h3>
+          <p>Hassle-free 15-day return and exchanges, no questions asked.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- About Us Section -->
   <section class="about-us" id="about">
     <div class="container about-grid">
@@ -442,13 +452,14 @@
   <section class="testimonials">
     <div class="container">
       <div class="section-header text-center">
-        <h2>Loved By Happy Mothers</h2>
-        <p>Hear from some of the parents who have chosen Mother & Toddler products.</p>
+        <h2>Google Reviews: Mother N Toddler</h2>
+        <p style="font-weight:bold; color:var(--deep-orange); font-size:1.2rem; margin-top:5px;">4.1 ⭐ (117 Reviews) · Toy Store</p>
+        <p>beside Thinesipo hotel NCL, Ruby Block, Satyam Enclave, Kompally, Hyderabad</p>
       </div>
       <div class="testimonials-grid">
         <!-- Testimonial 1 -->
         <div class="testimonial-card">
-          <p class="testimonial-quote">"Best place for baby products and toys. Everything I needed for my newborn kit and feeding accessories was available. High quality and extremely fast delivery!"</p>
+          <p class="testimonial-quote">"Nice display, reasonable prices good staff"</p>
           <div class="testimonial-user">
             <!-- Custom SVG Profile Placeholder -->
             <svg class="testimonial-avatar" viewBox="0 0 50 50">
@@ -457,14 +468,14 @@
               <path d="M25,32 C18,32 12,38 12,45 L38,45 C38,38 32,32 25,32 Z" fill="#FF8A65" />
             </svg>
             <div class="testimonial-info">
-              <h4>Sarah Miller</h4>
-              <p>Mom of 6-month-old Tommy</p>
+              <h4>Local Guide</h4>
+              <p>Google Review</p>
             </div>
           </div>
         </div>
         <!-- Testimonial 2 -->
         <div class="testimonial-card">
-          <p class="testimonial-quote">"The wooden educational toys are wonderful! Toxin-free and sturdy. My 2-year-old loves stacking the blocks. The customer service team on WhatsApp was incredibly responsive."</p>
+          <p class="testimonial-quote">"Super display, good quality & best prices. Staff also good response"</p>
           <div class="testimonial-user">
             <svg class="testimonial-avatar" viewBox="0 0 50 50">
               <circle cx="25" cy="25" r="25" fill="#FFCDD2" />
@@ -472,14 +483,14 @@
               <path d="M25,32 C18,32 12,38 12,45 L38,45 C38,38 32,32 25,32 Z" fill="#4DB6AC" />
             </svg>
             <div class="testimonial-info">
-              <h4>Emily Watson</h4>
-              <p>Mom of 2-year-old Lily</p>
+              <h4>Happy Customer</h4>
+              <p>Google Review</p>
             </div>
           </div>
         </div>
         <!-- Testimonial 3 -->
         <div class="testimonial-card">
-          <p class="testimonial-quote">"Finding quality maternity shapewear and feeding nightwear was so hard until I shopped here. The materials are incredibly soft. Highly recommend to all new mothers!"</p>
+          <p class="testimonial-quote">"Baby products with reasonable price"</p>
           <div class="testimonial-user">
             <svg class="testimonial-avatar" viewBox="0 0 50 50">
               <circle cx="25" cy="25" r="25" fill="#C8E6C9" />
@@ -487,8 +498,8 @@
               <path d="M25,32 C18,32 12,38 12,45 L38,45 C38,38 32,32 25,32 Z" fill="#BA68C8" />
             </svg>
             <div class="testimonial-info">
-              <h4>Jessica Chen</h4>
-              <p>Mother of newborn baby Ethan</p>
+              <h4>Verified Buyer</h4>
+              <p>Google Review</p>
             </div>
           </div>
         </div>
@@ -501,7 +512,7 @@
     <div class="container contact-grid">
       <div class="contact-info">
         <h2>Get in Touch</h2>
-        <p>Have questions about baby sizing, deliveries, or custom gift wrapping? Reach out to us, and our friendly team will assist you!</p>
+        <p>Visit Mother N Toddler Toy Store! Our doors open at 10:30 am every day. Reach out to us for any queries.</p>
         
         <div class="contact-details">
           <!-- Item 1 -->
@@ -513,7 +524,7 @@
             </div>
             <div class="contact-text">
               <h3>Phone Call</h3>
-              <p><a href="tel:+18005558687">+1 (800) 555-TOYS</a></p>
+              <p><a href="tel:09949911776">099499 11776</a></p>
             </div>
           </div>
           <!-- Item 2 -->
@@ -524,8 +535,8 @@
               </svg>
             </div>
             <div class="contact-text">
-              <h3>Email Support</h3>
-              <p><a href="mailto:hello@motherandtoddler.com">hello@motherandtoddler.com</a></p>
+              <h3>Store Hours</h3>
+              <p>Opens 10:30 am onwards (Closed Fridays/Holidays might affect hours)</p>
             </div>
           </div>
           <!-- Item 3 -->
@@ -536,14 +547,14 @@
               </svg>
             </div>
             <div class="contact-text">
-              <h3>Main Flagship Store</h3>
-              <p>456 Toyland Boulevard, Happy Valley, CA 90210</p>
+              <h3>Store Location</h3>
+              <p>beside Thinesipo hotel NCL, Ruby Block, Satyam Enclave, Kompally, Hyderabad, Telangana 500067</p>
             </div>
           </div>
         </div>
 
         <!-- WhatsApp Link Button -->
-        <a href="https://wa.me/18005558687" class="whatsapp-link-btn" target="_blank">
+        <a href="https://wa.me/919949911776" class="whatsapp-link-btn" target="_blank">
           <svg viewBox="0 0 24 24">
             <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.47 16.86L2.03 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.9C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.32 4.53 17.87 6.09C19.42 7.64 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.66 20.15 9.3 19.79 8.1 19.1L7.78 18.91L4.62 19.74L5.47 16.66L5.26 16.32C4.51 15.13 4.12 13.75 4.12 11.91C4.12 7.37 7.82 3.67 12.05 3.67M8.83 7.87C8.63 7.87 8.3 7.94 8.03 8.24C7.76 8.54 7 9.28 7 10.79C7 12.3 8.1 13.75 8.25 13.95C8.4 14.15 10.37 17.34 13.47 18.56C16.05 19.58 16.58 19.38 17.13 19.33C17.69 19.28 18.92 18.6 19.17 17.89C19.42 17.18 19.42 16.58 19.35 16.45C19.27 16.32 19.12 16.25 18.9 16.15C18.67 16.05 17.55 15.5 17.35 15.43C17.14 15.35 17 15.31 16.85 15.54C16.7 15.76 16.27 16.27 16.14 16.4C16 16.53 15.87 16.55 15.65 16.45C15.42 16.35 14.67 16.1 13.78 15.3C13.09 14.69 12.62 13.93 12.49 13.7C12.36 13.47 12.47 13.35 12.59 13.24C12.69 13.14 12.82 12.97 12.93 12.83C13.05 12.7 13.09 12.6 13.17 12.45C13.24 12.3 13.2 12.17 13.15 12.07C13.1 11.97 12.7 11 12.53 10.59C12.37 10.19 12.2 10.25 12.07 10.25C11.95 10.25 11.8 10.25 11.65 10.25C11.5 10.25 11.25 10.3 11.05 10.53C10.85 10.75 10.29 11.31 10.29 12.43C10.29 13.55 11.1 14.63 11.21 14.78C11.33 14.93 12.82 17.35 15.17 18.27C17.06 19.01 17.45 18.83 17.86 18.8C18.4 18.75 19.05 18.42 19.2 18C19.35 17.58 19.35 17.2 19.3 17.15C19.25 17.1 19.1 17.03 18.88 16.92" fill="#FFFFFF"/>
           </svg>
@@ -553,7 +564,7 @@
 
       <!-- Styled Iframe Google Map Integration -->
       <div class="map-wrapper">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m13!1d3305.6174783309605!2d-118.40283838478479!3d34.07362002421469!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2bc047e27b409%3A0xe543ef81fb797c!2sBeverly%20Hills%2C%20CA%2090210!5e0!3m2!1sen!2sus!4v1687258412644!5m2!1sen!2sus" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe src="https://maps.google.com/maps?q=Mother%20N%20Toddler,%20Kompally,%20Hyderabad&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </div>
   </section>
@@ -587,24 +598,26 @@
       <!-- Col 2: Categories -->
       <div class="footer-col">
         <h3>Categories</h3>
+      <!-- Col 2: Useful links -->
+      <div class="footer-col">
+        <h3>Customer Support</h3>
         <ul>
-          <li><a href="#categories" onclick="app.filterCategory('Baby Dresses')">Baby Dresses</a></li>
-          <li><a href="#categories" onclick="app.filterCategory('Baby Toys')">Toys & Entertainment</a></li>
-          <li><a href="#categories" onclick="app.filterCategory('Feeding Accessories')">Feeding Accessories</a></li>
-          <li><a href="#categories" onclick="app.filterCategory('Maternity Wear')">Maternity Collection</a></li>
-          <li><a href="#categories" onclick="app.filterCategory('Baby story books')">Books & Learning</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">Shipping Details</a></li>
+          <li><a href="#">Returns & Exchanges</a></li>
+          <li><a href="#">Store FAQs</a></li>
         </ul>
       </div>
 
-      <!-- Col 3: Quick Links -->
+      <!-- Col 3: Legal -->
       <div class="footer-col">
-        <h3>Quick Links</h3>
+        <h3>Store Information</h3>
         <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#about">About Our Story</a></li>
-          <li><a href="#products">Featured Shop</a></li>
-          <li><a href="#contact">Contact Support</a></li>
-          <li><a href="#contact">Store Locator</a></li>
+          <li>Mother N Toddler Toy store</li>
+          <li>beside Thinesipo hotel NCL, Ruby Block</li>
+          <li>Satyam Enclave, Kompally, Hyderabad</li>
+          <li>Telangana 500067</li>
+          <li>Phone: 099499 11776</li>
         </ul>
       </div>
 
@@ -627,7 +640,20 @@
     </div>
   </footer>
 
-  <!-- Dark Backdrop Overlay -->
+  <!-- Notification Panel -->
+  <div class="notification-panel" id="notificationPanel">
+    <div class="notification-header">
+      <h3>Notifications</h3>
+      <div class="notification-actions">
+        <button id="markAllReadBtn" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:0.85rem; font-weight:700;">Mark all read</button>
+      </div>
+    </div>
+    <div class="notification-body" id="notificationBody">
+      <p class="empty-state">Loading...</p>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar/Drawer -->
   <div class="overlay" id="drawerOverlay"></div>
 
   <!-- Shopping Cart Drawer (Slides-out from Right) -->
@@ -696,7 +722,7 @@
         </div>
         <p id="userLoginRoleHint" style="font-size: 0.82rem; color: var(--light-brown); text-align: center; margin-top: -4px; margin-bottom: 12px;">Sign in as a parent to place orders and manage your wishlist.</p>
         
-        <form id="userLoginForm" style="display: flex; flex-direction: column; gap: 14px;">
+        <form id="userLoginForm" onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 14px;">
           <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column; gap: 6px;">
             <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Email Address</label>
             <input type="email" id="userLoginEmail" placeholder="e.g. mom@example.com" required style="border: 2px solid var(--cream); padding: 12px 16px; border-radius: var(--border-radius-md); font-family: var(--font-body); font-size: 0.95rem; width: 100%; outline: none; background-color: var(--cream);">
@@ -717,7 +743,7 @@
         <h3 style="font-family: var(--font-headings); font-size: 1.3rem; color: var(--dark-brown); text-align: center; margin-bottom: 4px;">Create Parent Account</h3>
         <p style="font-size: 0.85rem; color: var(--light-brown); text-align: center; margin-bottom: 12px;">Get started today. Save shipping options and shop hassle-free.</p>
         
-        <form id="userRegisterForm" style="display: flex; flex-direction: column; gap: 14px;">
+        <form id="userRegisterForm" onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 14px;">
           <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column; gap: 6px;">
             <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Full Name</label>
             <input type="text" id="userRegisterName" placeholder="e.g. Jane Doe" required style="border: 2px solid var(--cream); padding: 12px 16px; border-radius: var(--border-radius-md); font-family: var(--font-body); font-size: 0.95rem; width: 100%; outline: none; background-color: var(--cream);">
@@ -743,7 +769,7 @@
         <h3 style="font-family: var(--font-headings); font-size: 1.3rem; color: var(--dark-brown); text-align: center; margin-bottom: 4px;">Reset Password</h3>
         <p style="font-size: 0.85rem; color: var(--light-brown); text-align: center; margin-bottom: 12px;">Enter your email below and we will send a password reset link.</p>
         
-        <form id="userForgotForm" style="display: flex; flex-direction: column; gap: 14px;">
+        <form id="userForgotForm" onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 14px;">
           <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column; gap: 6px;">
             <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Email Address</label>
             <input type="email" id="userForgotEmail" placeholder="e.g. mom@example.com" required style="border: 2px solid var(--cream); padding: 12px 16px; border-radius: var(--border-radius-md); font-family: var(--font-body); font-size: 0.95rem; width: 100%; outline: none; background-color: var(--cream);">
@@ -774,6 +800,7 @@
               <th style="padding: 12px; font-weight: 700; color: var(--dark-brown);">Invoice ID</th>
               <th style="padding: 12px; font-weight: 700; color: var(--dark-brown);">Date Placed</th>
               <th style="padding: 12px; font-weight: 700; color: var(--dark-brown);">Items Purchased</th>
+              <th style="padding: 12px; font-weight: 700; color: var(--dark-brown);">Shipping Address</th>
               <th style="padding: 12px; font-weight: 700; color: var(--dark-brown);">Total Amount</th>
               <th style="padding: 12px; font-weight: 700; color: var(--dark-brown);">Payment Status</th>
               <th style="padding: 12px; font-weight: 700; color: var(--dark-brown);">Delivery Date</th>
@@ -782,7 +809,7 @@
           </thead>
           <tbody id="customerOrdersTableBody">
             <tr>
-              <td colspan="7" style="text-align: center; padding: 24px; color: var(--light-brown);">
+              <td colspan="8" style="text-align: center; padding: 24px; color: var(--light-brown);">
                 Loading your orders...
               </td>
             </tr>
@@ -952,6 +979,7 @@
         <button class="dash-tab active" id="tabManageProducts" style="font-weight: 700; padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: all 0.3s ease;">Manage Products</button>
         <button class="dash-tab" id="tabManageSlides" style="font-weight: 700; padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: all 0.3s ease;">Manage Slideshow Banners</button>
         <button class="dash-tab" id="tabManageOrders" style="font-weight: 700; padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: all 0.3s ease;">Manage Orders</button>
+        <button class="dash-tab" id="tabManageNotifications" style="font-weight: 700; padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: all 0.3s ease;">Notifications</button>
       </div>
       
       <!-- Dashboard Main Panels -->
@@ -1151,6 +1179,62 @@
           </div>
         </div>
 
+        <!-- SECTION 4: NOTIFICATIONS MANAGEMENT -->
+        <div id="notificationsDashboardSection" style="display: none; flex-direction: column; gap: 20px; width: 100%;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+             <h2 style="font-size: 1.5rem; color: var(--primary);">Broadcast Notifications</h2>
+          </div>
+          
+          <div class="dashboard-form-panel" style="background-color: var(--cream); padding: 24px; border-radius: var(--border-radius-lg); border: 2px solid var(--soft-yellow);">
+            <form id="notificationManageForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+              
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Title</label>
+                <input type="text" id="notifTitle" required placeholder="e.g. Flash Sale Live!" style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); outline: none;">
+              </div>
+
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Type</label>
+                <select id="notifType" required style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); outline: none; height: 44px;">
+                  <option value="General announcements">General announcements</option>
+                  <option value="New product launches">New product launches</option>
+                  <option value="Discounts">Discounts</option>
+                  <option value="Flash sales">Flash sales</option>
+                  <option value="Festival offers">Festival offers</option>
+                  <option value="Order updates">Order updates</option>
+                  <option value="Stock availability">Stock availability</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Target Audience</label>
+                <select id="notifAudience" required style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); outline: none; height: 44px;">
+                  <option value="All Users">All Users</option>
+                  <option value="New Users">New Users (Joined last 30 days)</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Priority</label>
+                <select id="notifPriority" required style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); outline: none; height: 44px;">
+                  <option value="High">High</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1;">
+                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Message</label>
+                <textarea id="notifMessage" rows="2" required placeholder="Type the notification body here..." style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); outline: none; resize: vertical;"></textarea>
+              </div>
+
+              <div style="grid-column: 1 / -1; display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px;">
+                <button type="submit" class="btn btn-primary" id="sendNotificationBtn" style="padding: 10px 24px; border-radius: 30px;">Send Broadcast Now</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1158,7 +1242,7 @@
   </div>
 
   <!-- Floating WhatsApp Widget Button -->
-  <a href="https://wa.me/18005558687" class="whatsapp-floating" target="_blank" title="Chat with us">
+  <a href="https://wa.me/919949911776" class="whatsapp-floating" target="_blank" title="Chat with us">
     <svg viewBox="0 0 24 24">
       <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.47 16.86L2.03 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.9C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.32 4.53 17.87 6.09C19.42 7.64 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.66 20.15 9.3 19.79 8.1 19.1L7.78 18.91L4.62 19.74L5.47 16.66L5.26 16.32C4.51 15.13 4.12 13.75 4.12 11.91C4.12 7.37 7.82 3.67 12.05 3.67M8.83 7.87C8.63 7.87 8.3 7.94 8.03 8.24C7.76 8.54 7 9.28 7 10.79C7 12.3 8.1 13.75 8.25 13.95C8.4 14.15 10.37 17.34 13.47 18.56C16.05 19.58 16.58 19.38 17.13 19.33C17.69 19.28 18.92 18.6 19.17 17.89C19.42 17.18 19.42 16.58 19.35 16.45C19.27 16.32 19.12 16.25 18.9 16.15C18.67 16.05 17.55 15.5 17.35 15.43C17.14 15.35 17 15.31 16.85 15.54C16.7 15.76 16.27 16.27 16.14 16.4C16 16.53 15.87 16.55 15.65 16.45C15.42 16.35 14.67 16.1 13.78 15.3C13.09 14.69 12.62 13.93 12.49 13.7C12.36 13.47 12.47 13.35 12.59 13.24C12.69 13.14 12.82 12.97 12.93 12.83C13.05 12.7 13.09 12.6 13.17 12.45C13.24 12.3 13.2 12.17 13.15 12.07C13.1 11.97 12.7 11 12.53 10.59C12.37 10.19 12.2 10.25 12.07 10.25C11.95 10.25 11.8 10.25 11.65 10.25C11.5 10.25 11.25 10.3 11.05 10.53C10.85 10.75 10.29 11.31 10.29 12.43C10.29 13.55 11.1 14.63 11.21 14.78C11.33 14.93 12.82 17.35 15.17 18.27C17.06 19.01 17.45 18.83 17.86 18.8C18.4 18.75 19.05 18.42 19.2 18C19.35 17.58 19.35 17.2 19.3 17.15C19.25 17.1 19.1 17.03 18.88 16.92" fill="#FFFFFF"/>
     </svg>
@@ -1167,8 +1251,42 @@
   <!-- Toast Notification Bubbles -->
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Mobile Bottom Navigation (Visible only on mobile) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <a href="#" class="bottom-nav-item active" id="bottomNavHome" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+      <svg viewBox="0 0 24 24"><path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="#" class="bottom-nav-item" id="bottomNavCategories" onclick="document.getElementById('categories').scrollIntoView({behavior: 'smooth'}); return false;">
+      <svg viewBox="0 0 24 24"><path d="M12,2L22,8L12,14L2,8L12,2M12,16L22,10L12,16L2,10L12,16Z" /></svg>
+      <span>Categories</span>
+    </a>
+    <a href="#" class="bottom-nav-item" id="bottomNavSearchBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); setTimeout(()=>document.getElementById('searchInput').focus(), 300); return false;">
+      <svg viewBox="0 0 24 24"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"/></svg>
+      <span>Search</span>
+    </a>
+    <a href="#" class="bottom-nav-item" id="bottomNavOrdersBtn" onclick="document.getElementById('myOrdersBtn') ? document.getElementById('myOrdersBtn').click() : document.getElementById('userLoginRegisterBtn').click(); return false;">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3M19 19H5V17H19V19M19 15H5V5H19V15M10 13H14V11H10V13M6 13H8V11H6V13M16 13H18V11H16V13Z"/></svg>
+      <span>Orders</span>
+    </a>
+    <a href="#" class="bottom-nav-item" id="notificationToggleMobile">
+      <svg viewBox="0 0 24 24" style="position: relative;">
+        <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,19.93C7.05,19.43 4,16.05 4,12C4,7.95 7.05,4.57 11,4.07V19.93M13,4.07C16.95,4.57 20,7.95 20,12C20,16.05 16.95,19.43 13,19.93V4.07Z"/>
+      </svg>
+      <span>Alerts</span>
+      <span class="badge" id="notificationBadgeMobile" style="display: none; position: absolute; top: 0; right: 8px; width: 14px; height: 14px; font-size: 0.6rem;">0</span>
+    </a>
+    <a href="#" class="bottom-nav-item" onclick="document.getElementById('userLogoutBtn') ? document.getElementById('userLogoutBtn').click() : document.getElementById('userLoginRegisterBtn').click(); return false;">
+      <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
   <!-- Razorpay Checkout Integration -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <!-- Socket.IO Client -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
   <!-- JavaScript Code logic -->
   <script type="module" src="app.js"></script>
