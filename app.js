@@ -350,7 +350,6 @@ let wishlist = JSON.parse(localStorage.getItem("mt_wishlist")) || [];
 let selectedCategory = "all";
 let selectedAgeGroup = "all";
 let searchQuery = "";
-let isOwnerLoggedIn = false;
 let slideshowInterval = null;
 let selectedPaymentMethod = "card";
 
@@ -362,7 +361,6 @@ const elements = {
   searchInput: document.getElementById("searchInput"),
   wishlistToggleBtn: document.getElementById("wishlistToggle"),
   cartToggleBtn: document.getElementById("cartToggle"),
-  ownerPortalBtn: document.getElementById("ownerPortalBtn"),
   wishlistBadge: document.getElementById("wishlistBadge"),
   cartBadge: document.getElementById("cartBadge"),
   productsGrid: document.getElementById("productsGrid"),
@@ -403,13 +401,6 @@ const elements = {
   quickViewModal: document.getElementById("quickViewModal"),
   modalBodyContent: document.getElementById("modalBodyContent"),
   closeModalBtn: document.getElementById("closeModalBtn"),
-
-  // Owner Auth Modals
-  ownerLoginModal: document.getElementById("ownerLoginModal"),
-  closeOwnerLoginBtn: document.getElementById("closeOwnerLoginBtn"),
-  ownerLoginForm: document.getElementById("ownerLoginForm"),
-  ownerUsername: document.getElementById("ownerUsername"),
-  ownerPassword: document.getElementById("ownerPassword"),
 
   // Owner Dashboard Modal
   ownerDashboardModal: document.getElementById("ownerDashboardModal"),
@@ -480,6 +471,9 @@ const elements = {
   userForgotPasswordBtn: document.getElementById("userForgotPasswordBtn"),
   userBackToLoginBtn: document.getElementById("userBackToLoginBtn"),
   userForgotEmail: document.getElementById("userForgotEmail"),
+  btnUserRoleUser: document.getElementById("btnUserRoleUser"),
+  btnUserRoleAdmin: document.getElementById("btnUserRoleAdmin"),
+  userLoginRoleHint: document.getElementById("userLoginRoleHint"),
   userSubmitLoginBtn: document.getElementById("userSubmitLoginBtn"),
   userSubmitRegisterBtn: document.getElementById("userSubmitRegisterBtn"),
   userSubmitForgotBtn: document.getElementById("userSubmitForgotBtn"),
@@ -513,6 +507,15 @@ const elements = {
   cardCvv: document.getElementById("cardCvv"),
   upiId: document.getElementById("upiId")
 };
+
+function setUserLoginRole(role) {
+  const isAdmin = role === "admin";
+  elements.btnUserRoleAdmin.classList.toggle("active", isAdmin);
+  elements.btnUserRoleUser.classList.toggle("active", !isAdmin);
+  elements.userLoginRoleHint.textContent = isAdmin
+    ? "Use your admin credentials to access the dashboard."
+    : "Sign in as a parent to place orders and manage your wishlist.";
+}
 
 // All categories list
 const ALL_CATEGORIES = [
@@ -615,9 +618,9 @@ window.addEventListener("DOMContentLoaded", () => {
         <a href="#" id="userLogoutBtn" style="color: var(--accent-red); text-decoration: none;">Logout</a>
       `;
       
-      // If user has admin role, grant owner permission automatically
+      // If user has admin role, keep dashboard access available through login
       if (userRole === "admin") {
-        isOwnerLoggedIn = true;
+        /* admin can open dashboard after sign in */
       }
     } else {
       // User is logged out
@@ -633,8 +636,6 @@ window.addEventListener("DOMContentLoaded", () => {
           openModal(elements.userAuthModal);
         });
       }
-      
-      isOwnerLoggedIn = false;
     }
   });
   
@@ -895,14 +896,9 @@ function setupEventListeners() {
   elements.cartToggleBtn.addEventListener("click", () => openDrawer(elements.cartDrawer));
   elements.wishlistToggleBtn.addEventListener("click", () => openDrawer(elements.wishlistDrawer));
 
-  // Owner Portal Open button
-  elements.ownerPortalBtn.addEventListener("click", () => {
-    if (isOwnerLoggedIn) {
-      openOwnerDashboard();
-    } else {
-      openModal(elements.ownerLoginModal);
-    }
-  });
+  // User Login Role Switcher
+  elements.btnUserRoleUser.addEventListener("click", () => setUserLoginRole("user"));
+  elements.btnUserRoleAdmin.addEventListener("click", () => setUserLoginRole("admin"));
 
   // Drawer close buttons
   elements.closeCartBtn.addEventListener("click", closeAllDrawers);
@@ -912,7 +908,6 @@ function setupEventListeners() {
 
   // Modal close buttons
   elements.closeModalBtn.addEventListener("click", closeModal);
-  elements.closeOwnerLoginBtn.addEventListener("click", closeModal);
   elements.closeOwnerDashboardBtn.addEventListener("click", closeModal);
   elements.closeUserAuthBtn.addEventListener("click", closeModal);
   elements.closeCustomerOrdersBtn.addEventListener("click", closeModal);
@@ -998,46 +993,8 @@ function setupEventListeners() {
     });
   });
 
-  // Owner Login handler via Firebase Auth
-  elements.ownerLoginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = elements.ownerUsername.value.trim();
-    const password = elements.ownerPassword.value;
-    
-    const loginBtn = elements.ownerLoginForm.querySelector("button[type='submit']");
-    loginBtn.disabled = true;
-    loginBtn.textContent = "Verifying Credentials...";
-
-    try {
-      const user = await loginUser(email, password);
-      const profile = await getUserProfile(user.uid);
-      
-      if (profile && profile.role === "admin") {
-        isOwnerLoggedIn = true;
-        elements.ownerUsername.value = "";
-        elements.ownerPassword.value = "";
-        closeModal();
-        openOwnerDashboard();
-        showToast("Access Granted! Welcome to Owner Dashboard", "success");
-      } else {
-        await logoutUser();
-        showToast("Access Denied! Owner credentials required.", "error");
-      }
-    } catch (err) {
-      let friendlyMsg = err.message;
-      if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
-        friendlyMsg = "Invalid Email or Password credentials.";
-      }
-      showToast(friendlyMsg, "error");
-    } finally {
-      loginBtn.disabled = false;
-      loginBtn.textContent = "Login";
-    }
-  });
-
   // Owner Logout handler
   elements.ownerLogoutBtn.addEventListener("click", () => {
-    isOwnerLoggedIn = false;
     closeModal();
     showToast("Logged out of Dashboard successfully.", "success");
   });
@@ -1231,6 +1188,8 @@ function setupEventListeners() {
     elements.userLoginRegisterBtn.addEventListener("click", (e) => {
       e.preventDefault();
       openModal(elements.userAuthModal);
+      elements.btnUserTabLogin.click();
+      setUserLoginRole("user");
     });
   }
 
@@ -1258,6 +1217,7 @@ function setupEventListeners() {
     elements.userLoginSection.style.display = "flex";
     elements.userRegisterSection.style.display = "none";
     elements.userForgotPasswordSection.style.display = "none";
+    setUserLoginRole("user");
   });
 
   elements.btnUserTabRegister.addEventListener("click", () => {
@@ -1287,18 +1247,34 @@ function setupEventListeners() {
     e.preventDefault();
     const email = elements.userLoginEmail.value.trim();
     const password = elements.userLoginPassword.value;
+    const loginRole = elements.btnUserRoleAdmin.classList.contains("active") ? "admin" : "user";
     
     // Set loading state
     elements.userSubmitLoginBtn.disabled = true;
     elements.userSubmitLoginBtn.textContent = "Authenticating...";
     
     try {
-      await loginUser(email, password);
-      showToast("Logged in successfully!", "success");
-      closeModal();
+      const user = await loginUser(email, password);
+      const profile = await getUserProfile(user.uid);
+      const userRole = profile?.role || user.role || "user";
+
+      if (loginRole === "admin" && userRole !== "admin") {
+        await logoutUser();
+        throw { message: "Admin credentials required. Please sign in as a parent or use an admin account.", code: "auth/insufficient-permission" };
+      }
+
+      if (loginRole === "admin") {
+        showToast("Admin login successful!", "success");
+        closeModal();
+        openOwnerDashboard();
+      } else {
+        showToast("Logged in successfully!", "success");
+        closeModal();
+      }
+
       elements.userLoginForm.reset();
     } catch (err) {
-      let friendlyMsg = err.message;
+      let friendlyMsg = err.message || "Login failed. Please try again.";
       if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
         friendlyMsg = "Invalid email address or password.";
       } else if (err.code === "auth/invalid-email") {
@@ -2359,7 +2335,6 @@ function closeAllDrawers() {
 
 function closeModal() {
   elements.quickViewModal.classList.remove("active");
-  elements.ownerLoginModal.classList.remove("active");
   elements.ownerDashboardModal.classList.remove("active");
   elements.userAuthModal.classList.remove("active");
   elements.customerOrdersModal.classList.remove("active");
