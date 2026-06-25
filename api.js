@@ -4,7 +4,7 @@
  * JWT is stored in localStorage under "mt_jwt" and "mt_user"
  */
 
-const BASE_URL = "/api"; // Routed through Vite proxy → Express on :3000
+const BASE_URL = import.meta.env.VITE_API_URL || "/api"; // Uses production backend URL if set, otherwise falls back to Vite proxy
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
