@@ -17,6 +17,7 @@ const orderSchema = new mongoose.Schema({
   shippingAddress: { type: String, required: true, trim: true },
   paymentMethod: { type: String, default: "COD", trim: true },
   paymentStatus: { type: String, default: "Pending", trim: true },
+  deliveryDate: { type: String, default: "", trim: true },
   status: { type: String, default: "Pending", trim: true },
   products: { type: [productItemSchema], default: [] },
   items: { type: [productItemSchema], default: [] },

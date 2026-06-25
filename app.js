@@ -1578,6 +1578,7 @@ function setupEventListeners() {
     const shipping = subtotal > 1500 ? 0 : 99;
     const tax = Math.round(subtotal * 0.18);
     const grandTotal = subtotal + shipping + tax;
+    const deliveryDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
     // 4. Disable all fields during processing
     elements.checkoutPayBtn.disabled = true;
@@ -1606,7 +1607,8 @@ function setupEventListeners() {
           grandTotal,
           address,
           "COD",
-          "Pending COD"
+          "Pending COD",
+          deliveryDate
         );
 
         // Update profile
@@ -1686,6 +1688,7 @@ function setupEventListeners() {
                 shippingAddress: address,
                 paymentMethod: selectedPaymentMethod.toUpperCase(),
                 paymentStatus: "Paid",
+                deliveryDate,
                 products: mappedProducts,
                 items: mappedProducts,
                 totalAmount: grandTotal,
@@ -2713,7 +2716,7 @@ async function renderAdminOrdersTable() {
     if (orders.length === 0) {
       elements.adminOrdersTableBody.innerHTML = `
         <tr>
-          <td colspan="6" style="text-align: center; padding: 24px; color: var(--light-brown);">
+          <td colspan="8" style="text-align: center; padding: 24px; color: var(--light-brown);">
             No orders have been placed yet.
           </td>
         </tr>
@@ -2722,7 +2725,7 @@ async function renderAdminOrdersTable() {
     }
 
     elements.adminOrdersTableBody.innerHTML = orders.map(order => {
-      const date = order.createdDate ? new Date(order.createdDate.seconds * 1000).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
+      const date = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : order.createdDate?.seconds ? new Date(order.createdDate.seconds * 1000).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
       const itemsHtml = order.items.map(item => `${item.name} (x${item.quantity})`).join("<br>");
       
       const statusOptions = ["Pending", "Shipped", "Delivered"];
@@ -2748,6 +2751,12 @@ async function renderAdminOrdersTable() {
           </td>
           <td style="padding: 12px; font-weight: 700; color: var(--dark-brown);">
             ₹${order.subtotal.toLocaleString('en-IN')}
+          </td>
+          <td style="padding: 12px; font-size: 0.85rem; color: ${order.paymentStatus === 'Paid' ? 'green' : 'var(--dark-brown)'}; font-weight: 700;">
+            ${order.paymentStatus || 'Pending'}
+          </td>
+          <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown); white-space: nowrap;">
+            ${order.deliveryDate || 'TBD'}
           </td>
           <td style="padding: 12px; text-align: center;">
             <select class="admin-stock-badge" style="height: auto; padding: 6px 12px; border-radius: var(--border-radius-sm); font-family: var(--font-body); font-size: 0.85rem; cursor: pointer; outline: none; border: 1.5px solid var(--cream);" 
@@ -2796,7 +2805,7 @@ async function renderCustomerOrders() {
     if (orders.length === 0) {
       elements.customerOrdersTableBody.innerHTML = `
         <tr>
-          <td colspan="5" style="text-align: center; padding: 24px; color: var(--light-brown);">
+          <td colspan="7" style="text-align: center; padding: 24px; color: var(--light-brown);">
             You haven't placed any orders yet.
           </td>
         </tr>
@@ -2805,7 +2814,7 @@ async function renderCustomerOrders() {
     }
 
     elements.customerOrdersTableBody.innerHTML = orders.map(order => {
-      const date = order.createdDate ? new Date(order.createdDate.seconds * 1000).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
+      const date = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : order.createdDate?.seconds ? new Date(order.createdDate.seconds * 1000).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
       const itemsHtml = order.items.map(item => `${item.name} (x${item.quantity})`).join("<br>");
       
       let statusColor = "var(--light-brown)";
@@ -2825,6 +2834,12 @@ async function renderCustomerOrders() {
           </td>
           <td style="padding: 12px; font-weight: 700; color: var(--dark-brown);">
             ₹${order.subtotal.toLocaleString('en-IN')}
+          </td>
+          <td style="padding: 12px; font-size: 0.85rem; color: ${order.paymentStatus === 'Paid' ? 'green' : 'var(--dark-brown)'}; font-weight: 700;">
+            ${order.paymentStatus || 'Pending'}
+          </td>
+          <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown); white-space: nowrap;">
+            ${order.deliveryDate || 'TBD'}
           </td>
           <td style="padding: 12px; text-align: center; font-weight: 700; color: ${statusColor}; font-size: 0.85rem;">
             ${order.status || "Pending"}

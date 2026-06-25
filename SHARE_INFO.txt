@@ -1,0 +1,4 @@
+Project archive: mother-n-toddler-shop.zip
+GitHub repo: https://github.com/JohnWeslyKurasa/toys-shop.git
+Instructions: unzip the archive on the other device and run npm install, then npm run dev.
+

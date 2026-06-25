@@ -42,8 +42,12 @@ export function onAuthStateChanged(authInstance, callback) {
 
 function getHeaders() {
   const headers = { "Content-Type": "application/json" };
-  if (authToken) {
-    headers.Authorization = `Bearer ${authToken}`;
+  let tokenValue = authToken;
+  if (typeof window !== "undefined") {
+    tokenValue = localStorage.getItem(STORAGE_TOKEN_KEY) || tokenValue;
+  }
+  if (tokenValue) {
+    headers.Authorization = `Bearer ${tokenValue}`;
   }
   return headers;
 }
@@ -60,6 +64,10 @@ async function backendFetch(path, options = {}) {
 
     if (!response.ok) {
       const message = body?.message || response.statusText || "Backend request failed";
+      if (response.status === 401 && message.toLowerCase().includes("invalid or expired token")) {
+        await logoutUser();
+        throw new Error("Session expired. Please sign in again.");
+      }
       throw new Error(message);
     }
 
@@ -294,13 +302,13 @@ export async function updateUserProfile(uid, data) {
   }
 }
 
-export async function placeOrder(userId, name, email, phone, cartItems, subtotal, shippingAddress = "", paymentMethod = "COD", paymentStatus = "Pending") {
+export async function placeOrder(userId, name, email, phone, cartItems, subtotal, shippingAddress = "", paymentMethod = "COD", paymentStatus = "Pending", deliveryDate = "") {
   if (!useMock && authToken) {
     try {
       const payload = await backendFetch("/api/orders", {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ userId, name, email, phone, cartItems, subtotal, shippingAddress, paymentMethod, paymentStatus })
+        body: JSON.stringify({ userId, name, email, phone, cartItems, subtotal, shippingAddress, paymentMethod, paymentStatus, deliveryDate })
       });
       return payload.orderId;
     } catch (err) {
@@ -323,6 +331,7 @@ export async function placeOrder(userId, name, email, phone, cartItems, subtotal
   });
 
   const totalAmountVal = typeof subtotal === "number" && !isNaN(subtotal) ? subtotal : Number(subtotal);
+  const estimatedDelivery = deliveryDate || new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   const orderData = {
     orderId,
     userId,
@@ -332,6 +341,7 @@ export async function placeOrder(userId, name, email, phone, cartItems, subtotal
     shippingAddress: shippingAddress?.trim() || "",
     paymentMethod,
     paymentStatus,
+    deliveryDate: estimatedDelivery,
     products: mappedProducts,
     items: mappedProducts,
     totalAmount: totalAmountVal,

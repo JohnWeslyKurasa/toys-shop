@@ -170,6 +170,17 @@ async function saveOrder(orderData) {
   return orderData;
 }
 
+async function updateOrderInStore(orderId, updates) {
+  if (dbConnected) {
+    return Order.findOneAndUpdate({ orderId }, updates, { new: true }).lean();
+  }
+  const order = memoryOrders.find((o) => o.orderId === orderId);
+  if (order) {
+    Object.assign(order, updates);
+  }
+  return order || null;
+}
+
 async function getOrdersForUser(userId) {
   if (dbConnected) {
     return Order.find({ userId }).sort({ createdAt: -1 }).lean();
@@ -344,7 +355,7 @@ app.put("/api/auth/profile", authMiddleware, async (req, res) => {
 });
 
 app.post("/api/orders", authMiddleware, async (req, res) => {
-  const { name, email, phone, cartItems, subtotal, shippingAddress = "", paymentMethod = "COD", paymentStatus = "Pending" } = req.body;
+  const { name, email, phone, cartItems, subtotal, shippingAddress = "", paymentMethod = "COD", paymentStatus = "Pending", deliveryDate = "" } = req.body;
 
   if (!name || !email || !phone || !shippingAddress || !Array.isArray(cartItems) || cartItems.length === 0) {
     return res.status(400).json({ success: false, message: "Missing order information" });
@@ -361,6 +372,7 @@ app.post("/api/orders", authMiddleware, async (req, res) => {
     }));
 
     const totalAmountVal = Number(subtotal) > 0 ? Number(subtotal) : mappedProducts.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const estimatedDelivery = deliveryDate || new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
     const orderData = {
       orderId,
@@ -371,6 +383,7 @@ app.post("/api/orders", authMiddleware, async (req, res) => {
       shippingAddress: shippingAddress.trim(),
       paymentMethod: paymentMethod.trim(),
       paymentStatus: paymentStatus.trim(),
+      deliveryDate: estimatedDelivery,
       products: mappedProducts,
       items: mappedProducts,
       totalAmount: totalAmountVal,
@@ -461,9 +474,18 @@ app.post("/api/payments/verify", async (req, res) => {
   }
 
   try {
-    const order = await updateOrderStatusInStore(orderData.orderId, orderData.status || "Paid");
+    const updates = {
+      paymentStatus: "Paid",
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id
+    };
+
+    let order = await updateOrderInStore(orderData.orderId, updates);
     if (!order) {
-      return res.json({ success: true, warning: "Payment verified but order record not found", orderId: orderData.orderId });
+      orderData.paymentStatus = "Paid";
+      orderData.razorpayOrderId = razorpay_order_id;
+      orderData.razorpayPaymentId = razorpay_payment_id;
+      order = await saveOrder(orderData);
     }
     return res.json({ success: true, orderId: order.orderId });
   } catch (err) {
