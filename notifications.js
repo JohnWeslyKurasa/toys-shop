@@ -1,9 +1,13 @@
 import { showToast } from './app.js';
 
 let socket = null;
-let authToken = localStorage.getItem("mt_backend_auth_token") || null;
+let authToken = localStorage.getItem("mt_jwt") || null; // Fixed key
+let isInitialized = false;
 
 export function initNotifications() {
+  if (isInitialized) return;
+  isInitialized = true;
+
   const notificationToggles = [document.getElementById('notificationToggle'), document.getElementById('notificationToggleMobile')].filter(Boolean);
   const notificationPanel = document.getElementById('notificationPanel');
   const notificationBody = document.getElementById('notificationBody');
@@ -125,7 +129,7 @@ export function initNotifications() {
 }
 
 function initSocket() {
-  if (window.io) {
+  if (window.io && !socket) {
     socket = window.io(window.location.origin);
     
     socket.on('new_notification', (notification) => {
@@ -220,6 +224,8 @@ function renderNotifications(notifications) {
   notifications.forEach(un => {
     // Robust mapping: fallback to `un` if `un.notificationId` is missing or is just a string ID
     const n = (un.notificationId && typeof un.notificationId === 'object') ? un.notificationId : un;
+    if (!n) return; // Skip if completely missing (e.g., deleted notification)
+    
     const isRead = un.isRead !== undefined ? un.isRead : false;
     
     const item = document.createElement('div');
@@ -237,7 +243,7 @@ function renderNotifications(notifications) {
       <div class="notif-content">
         <div class="notif-title">${n.title || 'Notification'}</div>
         <div class="notif-message">${n.message || ''}</div>
-        <div class="notif-time">${new Date(n.createdAt).toLocaleString()}</div>
+        <div class="notif-time">${n.createdAt ? new Date(n.createdAt).toLocaleString() : ''}</div>
       </div>
     `;
 

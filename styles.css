@@ -1796,15 +1796,39 @@ footer {
   }
 
   .nav-container {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     padding: 12px 16px;
-    gap: 8px;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
   }
   
-  .search-bar {
-    order: 0;
+  .hamburger {
+    order: 1;
+    margin-right: 10px;
+  }
+
+  .logo {
+    order: 2;
     flex: 1;
-    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .logo .brand-logo-svg {
+    height: 32px; /* Slightly smaller for mobile */
+    max-width: 100%;
+  }
+
+  .nav-actions {
+    order: 3;
+    gap: 10px;
+  }
+
+  .search-bar {
+    order: 4;
+    flex: 0 0 100%;
+    margin: 4px 0 0 0;
   }
   
   .search-bar input {
@@ -2316,26 +2340,29 @@ footer {
 /* Mobile Responsiveness for Slider */
 @media (max-width: 768px) {
   .hero-slider-container {
-    height: 600px;
+    height: 700px; /* Increased from 600px to prevent overlap */
   }
   .hero-slide-grid {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
-    padding: 60px 24px 40px 24px;
+    padding: 40px 20px 20px 20px; /* Reduced padding */
     text-align: center;
-    gap: 20px;
+    gap: 16px;
   }
   .hero-slide-content {
     align-items: center;
   }
   .slide-title {
-    font-size: 2.2rem;
+    font-size: 1.8rem; /* Reduced to fit mobile */
+    line-height: 1.2;
+    margin-bottom: 12px;
   }
   .slide-subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
   }
   .hero-slide-image img {
-    max-height: 250px;
+    max-height: 220px; /* Slightly smaller image to fit container safely */
   }
   .slides-arrow {
     width: 40px;
