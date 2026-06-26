@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "start": "npm start --workspace=toys-shop-backend",
-    "build": "echo 'No build required for backend deployment'",
+    "build": "npm run build --workspace=toys-shop-frontend",
     "dev": "concurrently \"npm run dev --workspace=toys-shop-backend\" \"npm run dev --workspace=toys-shop-frontend\""
   },
   "devDependencies": {
