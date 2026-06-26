@@ -3,6 +3,7 @@ import { showToast } from './app.js';
 let socket = null;
 let authToken = localStorage.getItem("mt_jwt") || null; // Fixed key
 let isInitialized = false;
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 export function initNotifications() {
   if (isInitialized) return;
@@ -69,13 +70,13 @@ export function initNotifications() {
     markAllReadBtn.addEventListener('click', async () => {
       try {
         if (authToken) {
-          await fetch('/api/notifications/read-all', {
+          await fetch(BASE_URL + '/notifications/read-all', {
             method: 'PATCH',
             headers: { 'Authorization': `Bearer ${authToken}` }
           });
         } else {
-          // Mark all public as read
-          const res = await fetch('/api/notifications/public');
+          // Fallback for public: mark in localStorage
+          const res = await fetch(BASE_URL + '/notifications/public');
           const data = await res.json();
           if (data.success) {
             const readPublicNotifications = JSON.parse(localStorage.getItem('mt_read_notifications') || '[]');
@@ -97,40 +98,41 @@ export function initNotifications() {
   if (adminForm) {
     adminForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const payload = {
-        title: document.getElementById('notifTitle').value,
-        type: document.getElementById('notifType').value,
-        targetAudience: document.getElementById('notifAudience').value,
-        priority: document.getElementById('notifPriority').value,
-        message: document.getElementById('notifMessage').value
-      };
+        const payload = {
+          title: document.getElementById('notifTitle').value,
+          type: document.getElementById('notifType').value,
+          message: document.getElementById('notifMessage').value,
+          targetAudience: document.getElementById('notifTargetAudience').value,
+          priority: document.getElementById('notifPriority').value,
+        };
 
-      try {
-        const response = await fetch('/api/notifications/admin', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
-          },
-          body: JSON.stringify(payload)
-        });
-        const data = await response.json();
-        if (data.success) {
-          showToast('Notification Broadcasted Successfully!', 'success');
-          adminForm.reset();
-        } else {
-          showToast(data.message || 'Failed to send', 'error');
+        try {
+          const response = await fetch(BASE_URL + '/notifications/admin', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(payload)
+          });
+          const data = await response.json();
+          if (data.success) {
+            showToast('Notification Broadcasted Successfully!', 'success');
+            adminForm.reset();
+          } else {
+            showToast(data.message || 'Failed to send', 'error');
+          }
+        } catch (err) {
+          showToast('Error sending broadcast', 'error');
         }
-      } catch (err) {
-        showToast('Error sending broadcast', 'error');
-      }
     });
   }
 }
 
 function initSocket() {
   if (window.io && !socket) {
-    socket = window.io(window.location.origin);
+    const socketUrl = BASE_URL.replace('/api', '');
+    socket = window.io(socketUrl);
     
     socket.on('new_notification', (notification) => {
       // Show toast
@@ -151,7 +153,7 @@ function initSocket() {
 
 async function fetchNotifications() {
   try {
-    const url = authToken ? '/api/notifications' : '/api/notifications/public';
+    const url = authToken ? BASE_URL + '/notifications' : BASE_URL + '/notifications/public';
     const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
     
     const res = await fetch(url, { headers });
@@ -178,7 +180,7 @@ async function updateBadgeCount() {
     if (badges.length === 0) return;
 
     if (authToken) {
-      const res = await fetch('/api/notifications/unread-count', {
+      const res = await fetch(BASE_URL + '/notifications/unread-count', {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       const data = await res.json();
@@ -193,7 +195,7 @@ async function updateBadgeCount() {
         });
       }
     } else {
-      const res = await fetch('/api/notifications/public');
+      const res = await fetch(BASE_URL + '/notifications/public');
       const data = await res.json();
       if (data.success) {
         const readPublicNotifications = JSON.parse(localStorage.getItem('mt_read_notifications') || '[]');
@@ -250,10 +252,11 @@ function renderNotifications(notifications) {
     item.addEventListener('click', async () => {
       if (!un.isRead) {
         if (authToken) {
-          await fetch(`/api/notifications/read/${n._id}`, {
+          await fetch(`${BASE_URL}/notifications/read/${n._id}`, {
             method: 'PATCH',
             headers: { 'Authorization': `Bearer ${authToken}` }
           });
+          un.isRead = true;
         } else {
           const readPublicNotifications = JSON.parse(localStorage.getItem('mt_read_notifications') || '[]');
           if (!readPublicNotifications.includes(n._id)) {
