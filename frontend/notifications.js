@@ -3,7 +3,7 @@ import { showToast } from './app.js';
 let socket = null;
 let authToken = localStorage.getItem("mt_jwt") || null; // Fixed key
 let isInitialized = false;
-const BASE_URL = import.meta.env.VITE_API_URL || "/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://toys-shop-1.onrender.com/api";
 
 export function initNotifications() {
   if (isInitialized) return;

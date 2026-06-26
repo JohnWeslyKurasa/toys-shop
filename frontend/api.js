@@ -4,7 +4,7 @@
  * JWT is stored in localStorage under "mt_jwt" and "mt_user"
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || "/api"; // Uses production backend URL if set, otherwise falls back to Vite proxy
+const BASE_URL = import.meta.env.VITE_API_URL || "https://toys-shop-1.onrender.com/api"; // Uses production backend URL
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
