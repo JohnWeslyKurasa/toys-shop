@@ -31,7 +31,7 @@ const apiLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',');
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000,https://motherntoddler-drbr58uic-nextgen-developers.vercel.app').split(',');
 app.use(cors({
   origin: function(origin, callback){
     if(!origin) return callback(null, true);
