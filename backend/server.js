@@ -31,16 +31,9 @@ const apiLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000,https://motherntoddler-drbr58uic-nextgen-developers.vercel.app,https://motherntoddler-two.vercel.app').split(',');
 app.use(cors({
-  origin: function(origin, callback){
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')){
-      return callback(null, true);
-    }
-    const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-    return callback(new Error(msg), false);
-  }
+  origin: true, // Allow all origins to resolve the deployment CORS issues
+  credentials: true
 }));
 
 // ── Body parser ───────────────────────────────────────────────────────────────
