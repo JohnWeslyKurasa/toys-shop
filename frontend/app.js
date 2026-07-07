@@ -453,9 +453,19 @@ const elements = {
   
   // Dashboard Tabs & sections
   tabManageProducts: document.getElementById("tabManageProducts"),
+  tabManageCategories: document.getElementById("tabManageCategories"),
   tabManageSlides: document.getElementById("tabManageSlides"),
   productsDashboardSection: document.getElementById("productsDashboardSection"),
+  categoriesDashboardSection: document.getElementById("categoriesDashboardSection"),
   slidesDashboardSection: document.getElementById("slidesDashboardSection"),
+  addNewCategoryBtn: document.getElementById("addNewCategoryBtn"),
+  adminCategoriesList: document.getElementById("adminCategoriesList"),
+  categoryFormPanel: document.getElementById("categoryFormPanel"),
+  categoryManageForm: document.getElementById("categoryManageForm"),
+  cancelCatFormBtn: document.getElementById("cancelCatFormBtn"),
+  subcategoryFormPanel: document.getElementById("subcategoryFormPanel"),
+  subcategoryManageForm: document.getElementById("subcategoryManageForm"),
+  cancelSubcatFormBtn: document.getElementById("cancelSubcatFormBtn"),
   slideFormPanel: document.getElementById("slideFormPanel"),
   slideFormPanelTitle: document.getElementById("slideFormPanelTitle"),
   slideManageForm: document.getElementById("slideManageForm"),
@@ -1010,7 +1020,24 @@ function setupEventListeners() {
     
     const id = elements.editProductId.value;
     const name = elements.prodName.value.trim();
-    const category = elements.prodCategory.value;
+    const catValue = elements.prodCategory.value; // "categoryId|subcategoryId" or "categoryId|"
+    
+    let categoryId = null;
+    let subcategoryId = null;
+    let category = "Uncategorized"; // fallback
+    
+    if (catValue) {
+      const parts = catValue.split('|');
+      categoryId = parts[0] || null;
+      subcategoryId = parts[1] || null;
+      
+      // Get category name for local display update if needed
+      const selOption = elements.prodCategory.options[elements.prodCategory.selectedIndex];
+      if (selOption) {
+        category = selOption.text.split('>')[0].trim().replace('-- ', '').replace(' (No subcategories) --', '');
+      }
+    }
+    
     const price = parseFloat(elements.prodPrice.value);
     const originalPriceInput = elements.prodOriginalPrice.value;
     const originalPrice = originalPriceInput ? parseFloat(originalPriceInput) : null;
@@ -1022,91 +1049,116 @@ function setupEventListeners() {
 
     // Deduce age group based on category or default to all
     let ageGroup = "All";
-    if (category === "Baby Toys" || category === "Baby Basics" || category === "Baby Story Books" || category === "Newborn Baby Kits") {
+    if (category.toLowerCase().includes("toys") || category.toLowerCase().includes("new born")) {
       ageGroup = "0-1";
-    } else if (category === "Baby Walkers" || category === "Baby Dresses") {
-      ageGroup = "1-3";
-    } else if (category === "Educational Toys" || category === "Umbrella") {
-      ageGroup = "3-6";
-    } else if (category === "Remote Control Cars" || category === "Diary Notes" || category === "Age-wise Games (0–10 Years)") {
-      ageGroup = "6-10";
     }
 
-    if (id) {
-      // Edit mode
-      const idx = PRODUCTS.findIndex(p => p.id === parseInt(id));
-      if (idx > -1) {
-        PRODUCTS[idx] = {
-          ...PRODUCTS[idx],
-          name, category, price, originalPrice, image, inStock, description: desc, isNew, isSale, ageGroup
-        };
+    const productData = {
+      name, category, categoryId, subcategoryId, price, originalPrice, image, 
+      inStock, description: desc, isNew, isSale, ageGroup
+    };
+
+    try {
+      if (id) {
+        // Edit mode
+        await apiUpdateProduct(id, productData);
         showToast("Product updated successfully!", "success");
+      } else {
+        // Create mode
+        await apiCreateProduct(productData);
+        showToast("New product created successfully!", "success");
       }
-    } else {
-      // Create mode
-      const newId = PRODUCTS.length > 0 ? Math.max(...PRODUCTS.map(p => p.id)) + 1 : 1;
-      const newProduct = {
-        id: newId,
-        name, category, price, originalPrice, image, inStock, description: desc, rating: 5.0, isNew, isSale, ageGroup
-      };
-      PRODUCTS.unshift(newProduct);
-      showToast("New product created successfully!", "success");
-    }
 
-    saveProductsToStorage();
-    elements.productFormPanel.style.display = "none";
-    elements.addNewProductBtn.style.display = "block";
-    elements.productManageForm.reset();
-    
-    // Refresh views
-    renderProducts();
-    renderAdminProductsTable();
-    renderCategoryGroups();
+      elements.productFormPanel.style.display = "none";
+      elements.addNewProductBtn.style.display = "block";
+      elements.productManageForm.reset();
+      
+      // Refresh views from backend
+      await loadProducts();
+      renderAdminProductsTable();
+      renderCategoryGroups();
+    } catch (err) {
+      showToast(err.message, "error");
+    }
   });
 
   // Dashboard Tab Switching
   elements.tabManageProducts.addEventListener("click", () => {
     elements.tabManageProducts.classList.add("active");
+    elements.tabManageCategories.classList.remove("active");
     elements.tabManageSlides.classList.remove("active");
     elements.tabManageOrders.classList.remove("active");
     if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.productsDashboardSection.style.display = "flex";
+    elements.categoriesDashboardSection.style.display = "none";
     elements.slidesDashboardSection.style.display = "none";
     elements.ordersDashboardSection.style.display = "none";
     if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewProductBtn.style.display = "block";
+    elements.addNewCategoryBtn.style.display = "none";
     elements.addNewSlideBtn.style.display = "none";
     elements.slideFormPanel.style.display = "none";
+    elements.categoryFormPanel.style.display = "none";
+    elements.subcategoryFormPanel.style.display = "none";
+  });
+
+  elements.tabManageCategories.addEventListener("click", () => {
+    elements.tabManageCategories.classList.add("active");
+    elements.tabManageProducts.classList.remove("active");
+    elements.tabManageSlides.classList.remove("active");
+    elements.tabManageOrders.classList.remove("active");
+    if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
+    elements.categoriesDashboardSection.style.display = "flex";
+    elements.productsDashboardSection.style.display = "none";
+    elements.slidesDashboardSection.style.display = "none";
+    elements.ordersDashboardSection.style.display = "none";
+    if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
+    elements.addNewCategoryBtn.style.display = "block";
+    elements.addNewProductBtn.style.display = "none";
+    elements.addNewSlideBtn.style.display = "none";
+    elements.productFormPanel.style.display = "none";
+    elements.slideFormPanel.style.display = "none";
+    renderAdminCategoriesTable();
   });
 
   elements.tabManageSlides.addEventListener("click", () => {
     elements.tabManageSlides.classList.add("active");
     elements.tabManageProducts.classList.remove("active");
+    elements.tabManageCategories.classList.remove("active");
     elements.tabManageOrders.classList.remove("active");
     if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.slidesDashboardSection.style.display = "flex";
     elements.productsDashboardSection.style.display = "none";
+    elements.categoriesDashboardSection.style.display = "none";
     elements.ordersDashboardSection.style.display = "none";
     if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewSlideBtn.style.display = "block";
     elements.addNewProductBtn.style.display = "none";
+    elements.addNewCategoryBtn.style.display = "none";
     elements.productFormPanel.style.display = "none";
+    elements.categoryFormPanel.style.display = "none";
+    elements.subcategoryFormPanel.style.display = "none";
     renderAdminSlidesTable();
   });
 
   elements.tabManageOrders.addEventListener("click", () => {
     elements.tabManageOrders.classList.add("active");
     elements.tabManageProducts.classList.remove("active");
+    elements.tabManageCategories.classList.remove("active");
     elements.tabManageSlides.classList.remove("active");
     if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.ordersDashboardSection.style.display = "flex";
     elements.productsDashboardSection.style.display = "none";
+    elements.categoriesDashboardSection.style.display = "none";
     elements.slidesDashboardSection.style.display = "none";
     if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewProductBtn.style.display = "none";
+    elements.addNewCategoryBtn.style.display = "none";
     elements.addNewSlideBtn.style.display = "none";
     elements.productFormPanel.style.display = "none";
     elements.slideFormPanel.style.display = "none";
+    elements.categoryFormPanel.style.display = "none";
+    elements.subcategoryFormPanel.style.display = "none";
     renderAdminOrdersTable();
   });
 
@@ -1742,48 +1794,113 @@ function renderSidebarCategories() {
   });
 }
 
-// Render category list grids dynamically
-function renderCategoryGroups() {
-  elements.groupBabyEssentials.innerHTML = CATEGORY_DETAILS["Baby Essentials"].map(cat => getCategoryCardHtml(cat)).join("");
-  elements.groupFeedingCare.innerHTML = CATEGORY_DETAILS["Feeding & Care"].map(cat => getCategoryCardHtml(cat)).join("");
-  elements.groupToys.innerHTML = CATEGORY_DETAILS["Toys & Entertainment"].map(cat => getCategoryCardHtml(cat)).join("");
-  elements.groupMobilityBooks.innerHTML = CATEGORY_DETAILS["Mobility & Books"].map(cat => getCategoryCardHtml(cat)).join("");
-  elements.groupMomsSpecial.innerHTML = CATEGORY_DETAILS["Moms & Special Collections"].map(cat => getCategoryCardHtml(cat)).join("");
+// Render dynamic categories on homepage
+async function renderCategoryGroups() {
+  const dynamicCategoriesGrid = document.getElementById("dynamicCategoriesGrid");
+  if (!dynamicCategoriesGrid) return;
+  
+  try {
+    const res = await apiGetCategories();
+    const categories = res.data || [];
+    
+    // Filter categories that should show on home and sort by order
+    const homeCategories = categories
+      .filter(cat => cat.isActive && cat.showOnHome)
+      .sort((a, b) => a.order - b.order);
+      
+    if (homeCategories.length === 0) {
+      dynamicCategoriesGrid.innerHTML = `<div style="text-align: center; grid-column: 1 / -1; padding: 40px; color: var(--light-brown);">No categories available at the moment.</div>`;
+      return;
+    }
+    
+    // Beautiful premium gradients palette for categories
+    const gradients = [
+      "linear-gradient(135deg, #FFE082, #FFF9C4)", // yellow
+      "linear-gradient(135deg, #F8BBD0, #FCE4EC)", // pink
+      "linear-gradient(135deg, #B3E5FC, #E1F5FE)", // blue
+      "linear-gradient(135deg, #C8E6C9, #E8F5E9)", // green
+      "linear-gradient(135deg, #B2DFDB, #E0F2F1)", // teal
+      "linear-gradient(135deg, #D1C4E9, #EDE7F6)"  // purple
+    ];
+    
+    // Colors for the icons to match the gradients
+    const iconColors = [
+      "#FF9100", "#FF4081", "#03A9F4", "#4CAF50", "#009688", "#673AB7"
+    ];
 
-  document.querySelectorAll(".category-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const catName = card.getAttribute("data-cat-name");
+    let html = '';
+    homeCategories.forEach((cat, index) => {
+      const gradient = gradients[index % gradients.length];
+      const iconColor = iconColors[index % iconColors.length];
       
-      const tabs = elements.filterTabs.querySelectorAll(".filter-tab");
-      tabs.forEach(tab => tab.classList.remove("active"));
+      let mediaHtml = '';
+      if (cat.image) {
+        mediaHtml = `<div style="height: 140px; overflow: hidden; border-radius: var(--border-radius-md); margin-bottom: 15px;"><img src="${cat.image}" alt="${cat.name}" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+      } else {
+        mediaHtml = `<div class="category-icon-container" style="color: ${iconColor}; display: flex; justify-content: center; margin-bottom: 12px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); font-size: 4rem;">
+          ${cat.icon || '📁'}
+        </div>`;
+      }
       
-      let matchedTab = false;
-      tabs.forEach(tab => {
-        if (tab.getAttribute("data-category").toLowerCase() === catName.toLowerCase()) {
-          tab.classList.add("active");
-          matchedTab = true;
-        }
-      });
-      
-      selectedCategory = catName;
-      selectedAgeGroup = "all"; // Reset age filter
-      
-      renderProducts();
-      
-      document.querySelectorAll(".category-card").forEach(c => c.classList.remove("active"));
-      card.classList.add("active");
-
-      document.getElementById("products").scrollIntoView({ behavior: 'smooth' });
+      html += `
+        <div class="primary-category-card" data-category="${cat.name}" data-id="${cat._id}" style="background: ${gradient}; border-radius: var(--border-radius-lg); padding: 25px 20px; text-align: center; cursor: pointer; box-shadow: var(--shadow-md); border: 3px solid #FFF; transition: var(--transition-bounce);">
+          ${mediaHtml}
+          <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 6px;">${cat.name}</h3>
+          <p style="font-size: 0.9rem; color: var(--light-brown); margin: 0; min-height: 40px; display: flex; align-items: center; justify-content: center;">${cat.description || 'Discover our curated collection'}</p>
+          <div style="margin-top: 15px;">
+             <span style="font-size: 0.85rem; background: var(--dark-brown); padding: 8px 16px; border-radius: 20px; color: white; font-weight: 700; display: inline-block; transition: all 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">View Products</span>
+          </div>
+        </div>
+      `;
     });
-  });
+    
+    dynamicCategoriesGrid.innerHTML = html;
+    
+    // Attach click events
+    document.querySelectorAll(".primary-category-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const catName = card.getAttribute("data-category");
+        selectedCategory = catName;
+        selectedAgeGroup = "all"; // Reset age filter
+        
+        renderProducts();
+        
+        // Scroll to products
+        const productsSection = document.getElementById("products");
+        if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+    
+    // Render the subcategory filters (pills) for the active category
+    renderSubcategoryFilters(homeCategories);
+    
+  } catch (err) {
+    console.error("Failed to load home categories:", err);
+    dynamicCategoriesGrid.innerHTML = `<div style="text-align: center; grid-column: 1 / -1; padding: 40px; color: var(--accent-red);">Failed to load categories. Please try again.</div>`;
+  }
 }
 
-function getCategoryCardHtml(cat) {
-  return `
-    <div class="category-card" data-cat-name="${cat.name}">
-      <p style="font-weight: 700; font-size: 0.95rem; margin: 0; color: var(--dark-brown); text-align: center;">${cat.name}</p>
-    </div>
-  `;
+function renderSubcategoryFilters(categories) {
+  // Find or create the filter-tabs container
+  let filterTabsContainer = elements.filterTabs;
+  if (filterTabsContainer) {
+    filterTabsContainer.innerHTML = `<button class="filter-tab active" data-category="All">All Categories</button>`;
+    
+    categories.forEach(cat => {
+      filterTabsContainer.innerHTML += `<button class="filter-tab" data-category="${cat.name}">${cat.name}</button>`;
+    });
+    
+    // Reattach event listeners to new tabs
+    const tabs = elements.filterTabs.querySelectorAll(".filter-tab");
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        selectedCategory = tab.getAttribute("data-category");
+        renderProducts();
+      });
+    });
+  }
 }
 
 // Render featured products grid with Rupees pricing and percentage discounts and ageGroup filters
@@ -2810,14 +2927,332 @@ async function renderCustomerOrders() {
         </tr>
       `;
     }).join("");
-  } catch (err) {
+  } catch (error) {
+    console.error("Error fetching customer orders:", error);
     elements.customerOrdersTableBody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align: center; padding: 24px; color: var(--accent-red); font-weight: 700;">
-          Failed to load orders: ${err.message}
+          Failed to load orders: ${error.message}
         </td>
       </tr>
     `;
   }
 }
 
+// ==========================================
+// ADMIN CATEGORIES MANAGEMENT
+// ==========================================
+
+let adminCategories = [];
+let editingCategoryId = null;
+let editingSubcategoryId = null;
+
+async function renderAdminCategoriesTable() {
+  if (!getJwt()) return;
+  
+  elements.adminCategoriesList.innerHTML = `<div style="padding: 20px; text-align: center;">Loading categories...</div>`;
+  
+  try {
+    const res = await apiGetAllCategoriesAdmin();
+    adminCategories = res.data || [];
+    
+    if (adminCategories.length === 0) {
+      elements.adminCategoriesList.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--light-brown);">No categories found. Click 'Add Category' to create one.</div>`;
+      return;
+    }
+    
+    let html = '';
+    
+    adminCategories.forEach(cat => {
+      // Category Header Card
+      html += `
+        <div class="admin-category-card" data-id="${cat._id}" style="background: white; border-radius: var(--border-radius-md); border: 2px solid ${cat.isActive ? 'var(--soft-yellow)' : '#ddd'}; box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background-color: ${cat.isActive ? '#fffdf7' : '#f5f5f5'}; border-bottom: 1px solid rgba(0,0,0,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 8px; background-color: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                ${cat.icon || '📁'}
+              </div>
+              <div>
+                <h4 style="margin: 0; font-size: 1.1rem; color: ${cat.isActive ? 'var(--dark-brown)' : '#999'};">${cat.name} ${cat.featured ? '⭐' : ''} ${cat.showOnHome ? '🏠' : ''}</h4>
+                <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--light-brown);">${cat.slug} | Order: ${cat.order} | Products: ${cat.productCount || 0}</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-add-subcat" data-id="${cat._id}" style="padding: 6px 12px; font-size: 0.8rem;">+ Subcategory</button>
+              <button class="btn btn-secondary btn-edit-cat" data-id="${cat._id}" style="padding: 6px 12px; font-size: 0.8rem;">Edit</button>
+              <button class="btn btn-secondary btn-delete-cat" data-id="${cat._id}" style="padding: 6px 12px; font-size: 0.8rem; background-color: #ffebee; color: var(--accent-red); border-color: #ffcdd2;">Delete</button>
+            </div>
+          </div>
+          
+          <!-- Subcategories List -->
+          <div style="padding: 12px 20px 12px 40px; background-color: white;">
+            ${(!cat.subcategories || cat.subcategories.length === 0) ? 
+              `<div style="font-size: 0.85rem; color: #999; font-style: italic;">No subcategories added yet.</div>` : 
+              `<table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
+                <tbody>
+                  ${cat.subcategories.map(sub => `
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                      <td style="padding: 8px; width: 40px; color: #ccc;">↳</td>
+                      <td style="padding: 8px; font-weight: 600; color: ${sub.isActive ? 'var(--dark-brown)' : '#aaa'};">${sub.name}</td>
+                      <td style="padding: 8px; font-size: 0.8rem; color: var(--light-brown);">Order: ${sub.order}</td>
+                      <td style="padding: 8px; font-size: 0.8rem; color: var(--light-brown);">Products: ${sub.productCount || 0}</td>
+                      <td style="padding: 8px; text-align: right;">
+                        <button class="btn-icon btn-edit-subcat" data-id="${sub._id}" data-catid="${cat._id}" style="border: none; background: none; cursor: pointer; color: var(--primary);">✏️</button>
+                        <button class="btn-icon btn-delete-subcat" data-id="${sub._id}" data-catid="${cat._id}" style="border: none; background: none; cursor: pointer; color: var(--accent-red);">🗑️</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>`
+            }
+          </div>
+        </div>
+      `;
+    });
+    
+    elements.adminCategoriesList.innerHTML = html;
+    
+    // Attach event listeners
+    document.querySelectorAll('.btn-edit-cat').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        openEditCategoryForm(id);
+      });
+    });
+    
+    document.querySelectorAll('.btn-delete-cat').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = e.target.getAttribute('data-id');
+        if (confirm("Are you sure you want to delete this category? This will also delete all its subcategories.")) {
+          try {
+            await apiDeleteCategory(id);
+            showToast("Category deleted successfully", "success");
+            renderAdminCategoriesTable();
+            populateCategoryDropdowns();
+          } catch (err) {
+            showToast(err.message, "error");
+          }
+        }
+      });
+    });
+    
+    document.querySelectorAll('.btn-add-subcat').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const catId = e.target.getAttribute('data-id');
+        openAddSubcategoryForm(catId);
+      });
+    });
+    
+    document.querySelectorAll('.btn-edit-subcat').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        const catId = e.target.getAttribute('data-catid');
+        openEditSubcategoryForm(id, catId);
+      });
+    });
+    
+    document.querySelectorAll('.btn-delete-subcat').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = e.target.getAttribute('data-id');
+        if (confirm("Are you sure you want to delete this subcategory?")) {
+          try {
+            await apiDeleteSubcategory(id);
+            showToast("Subcategory deleted successfully", "success");
+            renderAdminCategoriesTable();
+          } catch (err) {
+            showToast(err.message, "error");
+          }
+        }
+      });
+    });
+    
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    elements.adminCategoriesList.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--accent-red);">Failed to load categories.</div>`;
+  }
+}
+
+// Category Form Handling
+elements.addNewCategoryBtn.addEventListener('click', () => {
+  elements.categoryManageForm.reset();
+  elements.editCategoryId.value = "";
+  elements.categoryFormPanel.style.display = "block";
+  elements.subcategoryFormPanel.style.display = "none";
+  elements.addNewCategoryBtn.style.display = "none";
+  document.getElementById("catFormPanelTitle").textContent = "Add New Category";
+  
+  // Set default checkbox values
+  document.getElementById("catShowOnHome").checked = true;
+  document.getElementById("catIsActive").checked = true;
+  document.getElementById("catFeatured").checked = false;
+});
+
+elements.cancelCatFormBtn.addEventListener('click', () => {
+  elements.categoryFormPanel.style.display = "none";
+  elements.addNewCategoryBtn.style.display = "block";
+});
+
+function openEditCategoryForm(id) {
+  const cat = adminCategories.find(c => c._id === id);
+  if (!cat) return;
+  
+  elements.categoryManageForm.reset();
+  elements.editCategoryId.value = cat._id;
+  document.getElementById("catName").value = cat.name || "";
+  document.getElementById("catIcon").value = cat.icon || "";
+  document.getElementById("catImage").value = cat.image || "";
+  document.getElementById("catBannerImage").value = cat.bannerImage || "";
+  document.getElementById("catDescription").value = cat.description || "";
+  document.getElementById("catMetaTitle").value = cat.metaTitle || "";
+  document.getElementById("catMetaDescription").value = cat.metaDescription || "";
+  
+  document.getElementById("catFeatured").checked = cat.featured || false;
+  document.getElementById("catShowOnHome").checked = cat.showOnHome !== false;
+  document.getElementById("catIsActive").checked = cat.isActive !== false;
+  
+  elements.categoryFormPanel.style.display = "block";
+  elements.subcategoryFormPanel.style.display = "none";
+  elements.addNewCategoryBtn.style.display = "none";
+  document.getElementById("catFormPanelTitle").textContent = "Edit Category";
+}
+
+elements.categoryManageForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const id = elements.editCategoryId.value;
+  const data = {
+    name: document.getElementById("catName").value,
+    icon: document.getElementById("catIcon").value,
+    image: document.getElementById("catImage").value,
+    bannerImage: document.getElementById("catBannerImage").value,
+    description: document.getElementById("catDescription").value,
+    metaTitle: document.getElementById("catMetaTitle").value,
+    metaDescription: document.getElementById("catMetaDescription").value,
+    featured: document.getElementById("catFeatured").checked,
+    showOnHome: document.getElementById("catShowOnHome").checked,
+    isActive: document.getElementById("catIsActive").checked,
+  };
+  
+  try {
+    if (id) {
+      await apiUpdateCategory(id, data);
+      showToast("Category updated successfully", "success");
+    } else {
+      await apiCreateCategory(data);
+      showToast("Category created successfully", "success");
+    }
+    elements.categoryFormPanel.style.display = "none";
+    elements.addNewCategoryBtn.style.display = "block";
+    renderAdminCategoriesTable();
+    populateCategoryDropdowns();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+});
+
+// Subcategory Form Handling
+function openAddSubcategoryForm(categoryId) {
+  elements.subcategoryManageForm.reset();
+  elements.editSubcategoryId.value = "";
+  elements.subcatParentId.value = categoryId;
+  
+  elements.subcategoryFormPanel.style.display = "block";
+  elements.categoryFormPanel.style.display = "none";
+  elements.addNewCategoryBtn.style.display = "none";
+  document.getElementById("subcatFormPanelTitle").textContent = "Add New Subcategory";
+  
+  document.getElementById("subcatIsActive").checked = true;
+}
+
+function openEditSubcategoryForm(subId, catId) {
+  const cat = adminCategories.find(c => c._id === catId);
+  if (!cat) return;
+  const sub = cat.subcategories.find(s => s._id === subId);
+  if (!sub) return;
+  
+  elements.subcategoryManageForm.reset();
+  elements.editSubcategoryId.value = sub._id;
+  elements.subcatParentId.value = catId;
+  
+  document.getElementById("subcatName").value = sub.name || "";
+  document.getElementById("subcatImage").value = sub.image || "";
+  document.getElementById("subcatDescription").value = sub.description || "";
+  document.getElementById("subcatIsActive").checked = sub.isActive !== false;
+  
+  elements.subcategoryFormPanel.style.display = "block";
+  elements.categoryFormPanel.style.display = "none";
+  elements.addNewCategoryBtn.style.display = "none";
+  document.getElementById("subcatFormPanelTitle").textContent = "Edit Subcategory";
+}
+
+elements.cancelSubcatFormBtn.addEventListener('click', () => {
+  elements.subcategoryFormPanel.style.display = "none";
+  elements.addNewCategoryBtn.style.display = "block";
+});
+
+elements.subcategoryManageForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const id = elements.editSubcategoryId.value;
+  const data = {
+    categoryId: elements.subcatParentId.value,
+    name: document.getElementById("subcatName").value,
+    image: document.getElementById("subcatImage").value,
+    description: document.getElementById("subcatDescription").value,
+    isActive: document.getElementById("subcatIsActive").checked,
+  };
+  
+  try {
+    if (id) {
+      await apiUpdateSubcategory(id, data);
+      showToast("Subcategory updated successfully", "success");
+    } else {
+      await apiCreateSubcategory(data);
+      showToast("Subcategory created successfully", "success");
+    }
+    elements.subcategoryFormPanel.style.display = "none";
+    elements.addNewCategoryBtn.style.display = "block";
+    renderAdminCategoriesTable();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+});
+
+// Update product form to use new categories
+async function populateCategoryDropdowns() {
+  try {
+    const res = await apiGetCategories();
+    const categories = res.data || [];
+    
+    // Update Add/Edit Product Dropdown
+    const prodCatSelect = document.getElementById("prodCategory");
+    if (prodCatSelect) {
+      let optionsHtml = '<option value="" disabled selected>Select Category</option>';
+      categories.forEach(cat => {
+        optionsHtml += `<optgroup label="${cat.name}">`;
+        if (cat.subcategories && cat.subcategories.length > 0) {
+          cat.subcategories.forEach(sub => {
+            optionsHtml += `<option value="${cat._id}|${sub._id}">${cat.name} > ${sub.name}</option>`;
+          });
+        } else {
+          optionsHtml += `<option value="${cat._id}|">-- ${cat.name} (No subcategories) --</option>`;
+        }
+        optionsHtml += `</optgroup>`;
+      });
+      prodCatSelect.innerHTML = optionsHtml;
+    }
+    
+  } catch (err) {
+    console.error("Failed to load categories for dropdown", err);
+  }
+}
+
+// Override openOwnerDashboard to load categories table too
+const _originalOpenOwnerDashboard = openOwnerDashboard;
+openOwnerDashboard = function() {
+  _originalOpenOwnerDashboard();
+  renderAdminCategoriesTable();
+  populateCategoryDropdowns();
+};
+
+init();

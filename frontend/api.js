@@ -167,3 +167,204 @@ export async function apiVerifyPayment(paymentData) {
   });
   return handleResponse(res);
 }
+
+// ── Products ─────────────────────────────────────────────────────────────────
+
+/**
+ * Get all products
+ */
+export async function apiGetProducts() {
+  const res = await fetch(`${BASE_URL}/products`);
+  return handleResponse(res);
+}
+
+/**
+ * Create a new product (admin)
+ */
+export async function apiCreateProduct(productData) {
+  const res = await fetch(`${BASE_URL}/products`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(productData),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Update a product (admin)
+ */
+export async function apiUpdateProduct(productId, productData) {
+  const res = await fetch(`${BASE_URL}/products/${productId}`, {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify(productData),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Delete a product (admin)
+ */
+export async function apiDeleteProduct(productId) {
+  const res = await fetch(`${BASE_URL}/products/${productId}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+// ── Categories ───────────────────────────────────────────────────────────────
+
+/**
+ * Get active categories (public) — includes subcategories & product counts
+ */
+export async function apiGetCategories() {
+  const res = await fetch(`${BASE_URL}/categories`);
+  return handleResponse(res);
+}
+
+/**
+ * Get ALL categories for admin (including inactive)
+ */
+export async function apiGetAllCategoriesAdmin() {
+  const res = await fetch(`${BASE_URL}/categories/admin/all`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Get single category by ID
+ */
+export async function apiGetCategoryById(id) {
+  const res = await fetch(`${BASE_URL}/categories/${id}`);
+  return handleResponse(res);
+}
+
+/**
+ * Create a new category (admin)
+ */
+export async function apiCreateCategory(categoryData) {
+  const res = await fetch(`${BASE_URL}/categories`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(categoryData),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Update a category (admin)
+ */
+export async function apiUpdateCategory(id, categoryData) {
+  const res = await fetch(`${BASE_URL}/categories/${id}`, {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify(categoryData),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Delete a category (admin)
+ */
+export async function apiDeleteCategory(id) {
+  const res = await fetch(`${BASE_URL}/categories/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Reorder categories (admin) — pass array of category IDs in new order
+ */
+export async function apiReorderCategories(orderedIds) {
+  const res = await fetch(`${BASE_URL}/categories/reorder`, {
+    method: "PATCH",
+    headers: authHeaders(),
+    body: JSON.stringify({ orderedIds }),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Bulk update category status (admin)
+ */
+export async function apiBulkCategoryStatus(ids, isActive) {
+  const res = await fetch(`${BASE_URL}/categories/bulk-status`, {
+    method: "PATCH",
+    headers: authHeaders(),
+    body: JSON.stringify({ ids, isActive }),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Bulk delete categories (admin)
+ */
+export async function apiBulkDeleteCategories(ids) {
+  const res = await fetch(`${BASE_URL}/categories/bulk-delete`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ ids }),
+  });
+  return handleResponse(res);
+}
+
+// ── Subcategories ────────────────────────────────────────────────────────────
+
+/**
+ * Get subcategories for a category
+ */
+export async function apiGetSubcategories(categoryId) {
+  const res = await fetch(`${BASE_URL}/subcategories/${categoryId}`);
+  return handleResponse(res);
+}
+
+/**
+ * Create a subcategory (admin)
+ */
+export async function apiCreateSubcategory(subcategoryData) {
+  const res = await fetch(`${BASE_URL}/subcategories`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(subcategoryData),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Update a subcategory (admin)
+ */
+export async function apiUpdateSubcategory(id, subcategoryData) {
+  const res = await fetch(`${BASE_URL}/subcategories/${id}`, {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify(subcategoryData),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Delete a subcategory (admin)
+ */
+export async function apiDeleteSubcategory(id) {
+  const res = await fetch(`${BASE_URL}/subcategories/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+/**
+ * Reorder subcategories (admin)
+ */
+export async function apiReorderSubcategories(orderedIds) {
+  const res = await fetch(`${BASE_URL}/subcategories/reorder`, {
+    method: "PATCH",
+    headers: authHeaders(),
+    body: JSON.stringify({ orderedIds }),
+  });
+  return handleResponse(res);
+}
