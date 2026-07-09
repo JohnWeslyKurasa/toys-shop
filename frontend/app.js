@@ -13,6 +13,22 @@ import {
   getJwt,
   apiCreateRazorpayOrder,
   apiVerifyPayment,
+  apiGetProducts,
+  apiCreateProduct,
+  apiUpdateProduct,
+  apiDeleteProduct,
+  apiGetCategories,
+  apiGetAllCategoriesAdmin,
+  apiCreateCategory,
+  apiUpdateCategory,
+  apiDeleteCategory,
+  apiReorderCategories,
+  apiGetSubcategories,
+  apiCreateSubcategory,
+  apiUpdateSubcategory,
+  apiDeleteSubcategory,
+  apiReorderSubcategories,
+  apiCreateProductReview
 } from "./api.js";
 
 // Default product database in Indian Rupees (₹) with ageGroup properties
@@ -22,7 +38,7 @@ const DEFAULT_PRODUCTS = [
     name: "Premium Stacking Wooden Toy Blocks",
     price: 1299,
     originalPrice: 1999,
-    category: "Baby Toys",
+    category: "Toys > Educational Toys",
     image: "assets/product_toy_blocks.png",
     description: "Toxin-free, organic maple wooden block set in lovely pastel yellow, cream, and soft orange hues. Promotes tactile learning, motor skills, and creative assembly for babies and toddlers.",
     rating: 4.9,
@@ -65,7 +81,7 @@ const DEFAULT_PRODUCTS = [
     price: 1199,
     originalPrice: 1499,
     category: "Baby Basics",
-    image: "https://images.unsplash.com/photo-1522850959076-58d7c04db972?q=80&w=400",
+    image: "assets/product_swaddle.png",
     description: "Breathable and ultra-soft organic swaddle blankets. Kept snug, secure, and thermo-regulated for newborns and babies.",
     rating: 4.9,
     inStock: true,
@@ -79,7 +95,7 @@ const DEFAULT_PRODUCTS = [
     price: 999,
     originalPrice: 1499,
     category: "Baby Grooming Products",
-    image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=400",
+    image: "assets/product_grooming.png",
     description: "All-in-one newborn safety kit including a soft goat-hair hairbrush, round-tip nail scissors, gentle emery boards, and a digital thermometer.",
     rating: 4.6,
     inStock: true,
@@ -93,7 +109,7 @@ const DEFAULT_PRODUCTS = [
     price: 699,
     originalPrice: 899,
     category: "Baby Cosmetics",
-    image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?q=80&w=400",
+    image: "assets/product_cream.png",
     description: "Hypoallergenic cosmetic lotion containing organic calendula and chamomile extracts. Softly moisturizes baby skin without greasy residues.",
     rating: 4.8,
     inStock: true,
@@ -107,7 +123,7 @@ const DEFAULT_PRODUCTS = [
     price: 1899,
     originalPrice: 2499,
     category: "Feeding Pillows",
-    image: "https://images.unsplash.com/photo-1515488042361-404e9250afef?q=80&w=400",
+    image: "assets/product_pillow.png",
     description: "U-shaped ergonomic pillow with a washable cream slipcover. Relieves arm and back strain for breastfeeding or bottle-feeding mothers.",
     rating: 4.9,
     inStock: true,
@@ -121,7 +137,7 @@ const DEFAULT_PRODUCTS = [
     price: 799,
     originalPrice: 999,
     category: "Feeding Bras",
-    image: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=400",
+    image: "assets/product_bra.png",
     description: "Wire-free nursing bra with one-handed drop-down cups for effortless breastfeeding. Breathable stretch fabric grows with your size.",
     rating: 4.5,
     inStock: true,
@@ -135,7 +151,7 @@ const DEFAULT_PRODUCTS = [
     price: 899,
     originalPrice: 1199,
     category: "Educational Toys",
-    image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=400",
+    image: "assets/product_clock.png",
     description: "Playful wooden block clock with sorted numeric shape pieces. Helps kids learn geometric shapes, colors, and telling time.",
     rating: 4.7,
     inStock: true,
@@ -145,94 +161,94 @@ const DEFAULT_PRODUCTS = [
   },
   {
     id: 10,
-    name: "First Steps Activity Baby Walker",
-    price: 2999,
-    originalPrice: 3999,
-    category: "Baby Walkers",
-    image: "https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?q=80&w=400",
-    description: "Stable wooden walker equipped with speed-control wheels, play gears, xylophone, and bead sliders. Encourages balance and motor skills.",
-    rating: 4.9,
+    name: "Luxury Urban Baby Stroller",
+    price: 15999,
+    originalPrice: 20999,
+    category: "Prams & Strollers",
+    image: "assets/product_stroller.png",
+    description: "Sleek charcoal grey stroller with lightweight aluminum frame, all-terrain wheels, and UPF 50+ canopy. Easy one-hand fold.",
+    rating: 4.8,
     inStock: true,
     isNew: true,
     isSale: true,
-    ageGroup: "1-3"
+    ageGroup: "0-3"
   },
   {
     id: 11,
-    name: "Interactive Baby Board Story Book Set",
-    price: 699,
-    originalPrice: 999,
-    category: "Baby Story Books",
-    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400",
-    description: "Includes three sensory lift-the-flap books with textures and high-contrast illustrations. Perfect for cuddling and early visual learning.",
-    rating: 4.8,
+    name: "Modern Adjustable Wooden High Chair",
+    price: 4999,
+    originalPrice: 6599,
+    category: "Baby Furniture",
+    image: "assets/product_highchair.png",
+    description: "Grows with your baby! Features an adjustable footrest, removable tray, and soft cushion. Solid wood construction.",
+    rating: 4.9,
     inStock: true,
     isNew: false,
     isSale: false,
-    ageGroup: "0-1"
+    ageGroup: "0-3"
   },
   {
     id: 12,
-    name: "Multi-Pocket Diaper Bag & Handbag",
-    price: 1999,
-    originalPrice: 2499,
-    category: "Handbags",
-    image: "https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?q=80&w=400",
-    description: "Stylish, premium multi-pocket canvas handbag. Includes insulated bottle slots, a waterproof diaper changing mat, and stroller hooks.",
-    rating: 4.8,
+    name: "Smart HD Video Baby Monitor",
+    price: 3499,
+    originalPrice: 4999,
+    category: "Nursery Tech",
+    image: "assets/product_monitor.png",
+    description: "1080p HD camera with night vision, two-way audio, and a 5-inch parent display screen. Peace of mind from any room.",
+    rating: 4.7,
     inStock: true,
     isNew: true,
-    isSale: false,
-    ageGroup: "All"
+    isSale: true,
+    ageGroup: "0-1"
   },
   {
     id: 13,
-    name: "Flowy Floral Maternity Maxi Dress",
-    price: 1899,
-    originalPrice: 2299,
-    category: "Maternity Wear",
-    image: "https://images.unsplash.com/photo-1572436224559-c143d229f394?q=80&w=400",
-    description: "Elastic waist maternity dress made of light floral chiffon. Perfect for baby showers, maternal photo shoots, or casual summer walks.",
-    rating: 4.6,
+    name: "Premium Vegan Leather Diaper Bag",
+    price: 2499,
+    originalPrice: 3199,
+    category: "Diaper Bags",
+    image: "assets/product_diaperbag.png",
+    description: "Stylish and practical backpack style with insulated bottle pockets, changing pad, and stroller straps. Beautiful camel brown finish.",
+    rating: 4.9,
     inStock: true,
-    isNew: false,
+    isNew: true,
     isSale: false,
     ageGroup: "All"
   },
   {
     id: 14,
-    name: "Pastel Balloon Birthday Decoration Kit",
-    price: 599,
-    originalPrice: 899,
-    category: "Birthday Decorations",
-    image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=400",
-    description: "A complete party kit containing 60 pastel biodegradable latex balloons, ribbon garland strings, 'Happy Birthday' banner, and a balloon pump.",
-    rating: 4.5,
+    name: "Silicone Teething Rings Set",
+    price: 399,
+    originalPrice: 599,
+    category: "Teethers & Pacifiers",
+    image: "assets/product_teether.png",
+    description: "Set of 3 food-grade silicone teething rings. Easy to grip, soothing on gums, and safely chewable.",
+    rating: 4.8,
     inStock: true,
     isNew: false,
     isSale: true,
-    ageGroup: "All"
+    ageGroup: "0-1"
   },
   {
     id: 15,
-    name: "Duckling Yellow Kids Safety Umbrella",
-    price: 499,
-    originalPrice: 699,
-    category: "Umbrella",
-    image: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400",
-    description: "Lightweight kid-sized umbrella with soft rounded safety tips and a cute duck beak handle. Easy pinch-free manual open mechanism.",
+    name: "Organic Earthy Romper Set",
+    price: 899,
+    originalPrice: 1299,
+    category: "Baby Clothing",
+    image: "assets/product_romper.png",
+    description: "Super soft organic cotton romper with snap closures for easy changes. Breathable and gentle on sensitive skin.",
     rating: 4.7,
     inStock: true,
-    isNew: false,
-    isSale: false,
-    ageGroup: "3-6"
+    isNew: true,
+    isSale: true,
+    ageGroup: "0-1"
   },
   {
     id: 16,
     name: "Natural Beechwood Animal Teething Toy",
     price: 399,
     originalPrice: 599,
-    category: "Baby Toys",
+    category: "Toys > Educational Toys",
     image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=400",
     description: "Toxin-free, chemical-free solid beechwood teething rings in cute animal shapes. Helps soothe tender gums and provides safe tactile play.",
     rating: 4.8,
@@ -246,7 +262,7 @@ const DEFAULT_PRODUCTS = [
     name: "Cute Plush Dino Toddler Backpack",
     price: 899,
     originalPrice: 1299,
-    category: "Bags & Backpacks",
+    category: "Gifts & Novelties > Photo Frames",
     image: "https://images.unsplash.com/photo-1576016770956-debb63d900bb?q=80&w=400",
     description: "Adorable, lightweight plush backpack featuring soft dino spikes and adjustable padded straps. Perfect for carrying preschool snacks and small toys.",
     rating: 4.7,
@@ -285,59 +301,89 @@ const DEFAULT_PRODUCTS = [
   }
 ];
 
-// Load products from LocalStorage or fallback to default list
-let PRODUCTS = JSON.parse(localStorage.getItem("mt_products")) || DEFAULT_PRODUCTS;
-if (PRODUCTS.length < DEFAULT_PRODUCTS.length) {
-  PRODUCTS = DEFAULT_PRODUCTS;
-  localStorage.setItem("mt_products", JSON.stringify(PRODUCTS));
+// Load products from Backend API
+let PRODUCTS = [];
+
+function getProductByIdLocal(id) {
+  if (!id) return null;
+  const idStr = String(id);
+  return PRODUCTS.find(p => String(p._id || p.id) === idStr) || null;
+}
+
+async function loadProducts() {
+  try {
+    const res = await apiGetProducts();
+    PRODUCTS = (res.data && res.data.length > 0) ? res.data : DEFAULT_PRODUCTS;
+  } catch (err) {
+    console.error("Failed to load products from backend", err);
+    PRODUCTS = DEFAULT_PRODUCTS;
+  }
 }
 
 const saveProductsToStorage = () => {
-  localStorage.setItem("mt_products", JSON.stringify(PRODUCTS));
+  // Deprecated: Products are now saved to backend directly
 };
 
 // Default slideshow banners database with animations matching content
 const DEFAULT_SLIDES = [
   {
     id: 1,
-    badgeText: "SPECIAL FESTIVAL OFFER",
+    badgeText: "NEW ARRIVALS",
     badgeStyle: "yellow",
-    title: "Toxin-Free Wooden Toys starting at ₹499",
-    subtitle: "Foster tactile learning, logic, and early motor skills with certified organic wooden stacking blocks and clocks.",
+    title: "Everything for Mom & Your Little One",
+    subtitle: "Premium organic products, toys, and parenting essentials curated with love.",
     bgStyle: "yellow",
-    illustration: "baby-playing",
-    imageUrl: "",
-    ctaText: "Shop Toys Now",
-    ctaCategory: "Baby Toys"
+    illustration: "custom-full",
+    imageUrl: "assets/banner_main.jpg",
+    ctaText: "Shop Now",
+    ctaCategory: "New Born"
   },
   {
     id: 2,
-    badgeText: "SEASONAL CLEARANCE",
-    badgeStyle: "red",
-    title: "Soft Organic Cotton Wear — Flat 30% Off",
-    subtitle: "Keep your little one cozy and cool in hypoallergenic, breathable ruffle dresses and swaddle basics.",
-    bgStyle: "pink",
-    illustration: "mother-holding",
-    imageUrl: "",
-    ctaText: "Explore Outfits",
-    ctaCategory: "Baby Dresses"
+    badgeText: "TOYS",
+    badgeStyle: "yellow",
+    title: "Cute Toys, Endless Joys",
+    subtitle: "Fun, safe, and educational toys for every developmental stage.",
+    bgStyle: "yellow",
+    illustration: "custom-full",
+    imageUrl: "assets/banner_toys.jpg",
+    ctaText: "Explore Toys",
+    ctaCategory: "Toys"
   },
   {
     id: 3,
-    badgeText: "NEW ARRIVALS",
-    badgeStyle: "blue",
-    title: "Safe BPA-Free Trainer Feeding Cups",
-    subtitle: "Leak-proof, easy-to-hold silicone straw trainer cups designed for your baby's comfortable transition.",
-    bgStyle: "blue",
-    illustration: "baby-crawling",
-    imageUrl: "",
-    ctaText: "Shop Feeding Care",
-    ctaCategory: "Feeding Accessories"
+    badgeText: "BABY CARE",
+    badgeStyle: "yellow",
+    title: "Gentle Care, Happy Baby",
+    subtitle: "Hypoallergenic, chemical-free bath and skincare essentials.",
+    bgStyle: "yellow",
+    illustration: "custom-full",
+    imageUrl: "assets/banner_care.jpg",
+    ctaText: "Shop Baby Care",
+    ctaCategory: "New Born"
+  },
+  {
+    id: 4,
+    badgeText: "MATERNITY",
+    badgeStyle: "pink",
+    title: "Everything Mom Needs",
+    subtitle: "Comfortable and stylish maternity wear, innerwear, and prenatal accessories.",
+    bgStyle: "pink",
+    illustration: "custom-full",
+    imageUrl: "assets/banner_maternity.jpg",
+    ctaText: "Shop Maternity",
+    ctaCategory: "Mother Care / Maternity"
   }
 ];
 
 // Load slides from LocalStorage or fallback to default
 let SLIDES = JSON.parse(localStorage.getItem("mt_slides")) || DEFAULT_SLIDES;
+
+// Auto-reset to new defaults if old preset slides are detected
+if (SLIDES.length > 0 && (SLIDES[0].illustration === "baby-playing" || SLIDES[0].imageUrl === "assets/main_banner.jpg")) {
+  SLIDES = DEFAULT_SLIDES;
+  localStorage.setItem("mt_slides", JSON.stringify(SLIDES));
+}
 
 const saveSlidesToStorage = () => {
   localStorage.setItem("mt_slides", JSON.stringify(SLIDES));
@@ -353,15 +399,31 @@ let slideshowInterval = null;
 let selectedPaymentMethod = "card";
 
 // ── Shared UI helpers (module-scope so all functions can use them) ──────────
-function renderLoggedInUI(displayName) {
+function renderLoggedInUI(displayName, role) {
   setNotificationAuthToken(getJwt());
   const section = document.getElementById("userAuthSection");
   if (!section) return;
+
+  const adminBtn = role === 'admin'
+    ? `<a href="#" id="openAdminDashboardBtn" style="background: var(--dark-brown); color: white; text-decoration: none; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; margin-right: 10px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">⚙ Admin</a>`
+    : '';
+
   section.innerHTML = `
+    ${adminBtn}
     <span style="color: var(--dark-brown); margin-right: 8px;">Hi, ${displayName}!</span>
     <a href="#" id="myOrdersBtn" style="color: var(--light-brown); text-decoration: none; font-weight: 700; margin-right: 12px; border-right: 1.5px solid rgba(93, 64, 55, 0.15); padding-right: 12px;">My Orders</a>
     <a href="#" id="userLogoutBtn" style="color: var(--accent-red); text-decoration: none;">Logout</a>
   `;
+
+  if (role === 'admin') {
+    const adminDashBtn = document.getElementById('openAdminDashboardBtn');
+    if (adminDashBtn) {
+      adminDashBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openOwnerDashboard();
+      });
+    }
+  }
 }
 
 function renderLoggedOutUI() {
@@ -433,7 +495,7 @@ const elements = {
   ownerDashboardModal: document.getElementById("ownerDashboardModal"),
   closeOwnerDashboardBtn: document.getElementById("closeOwnerDashboardBtn"),
   addNewProductBtn: document.getElementById("addNewProductBtn"),
-  addNewSlideBtn: document.getElementById("addNewSlideBtn"),
+  addNewSlideBtn: document.createElement("button"),
   ownerLogoutBtn: document.getElementById("ownerLogoutBtn"),
   productFormPanel: document.getElementById("productFormPanel"),
   formPanelTitle: document.getElementById("formPanelTitle"),
@@ -444,8 +506,11 @@ const elements = {
   prodPrice: document.getElementById("prodPrice"),
   prodOriginalPrice: document.getElementById("prodOriginalPrice"),
   prodImage: document.getElementById("prodImage"),
+  prodImages: document.getElementById("prodImages"),
   prodStock: document.getElementById("prodStock"),
+  prodAgeGroup: document.getElementById("prodAgeGroup"),
   prodDesc: document.getElementById("prodDesc"),
+  autoGenDescBtn: document.getElementById("autoGenDescBtn"),
   prodIsNew: document.getElementById("prodIsNew"),
   prodIsSale: document.getElementById("prodIsSale"),
   cancelFormBtn: document.getElementById("cancelFormBtn"),
@@ -454,34 +519,37 @@ const elements = {
   // Dashboard Tabs & sections
   tabManageProducts: document.getElementById("tabManageProducts"),
   tabManageCategories: document.getElementById("tabManageCategories"),
-  tabManageSlides: document.getElementById("tabManageSlides"),
+  tabManageSlides: document.createElement("button"),
   productsDashboardSection: document.getElementById("productsDashboardSection"),
   categoriesDashboardSection: document.getElementById("categoriesDashboardSection"),
-  slidesDashboardSection: document.getElementById("slidesDashboardSection"),
+  slidesDashboardSection: document.createElement("div"),
   addNewCategoryBtn: document.getElementById("addNewCategoryBtn"),
   adminCategoriesList: document.getElementById("adminCategoriesList"),
   categoryFormPanel: document.getElementById("categoryFormPanel"),
   categoryManageForm: document.getElementById("categoryManageForm"),
+  editCategoryId: document.getElementById("editCategoryId"),
   cancelCatFormBtn: document.getElementById("cancelCatFormBtn"),
   subcategoryFormPanel: document.getElementById("subcategoryFormPanel"),
   subcategoryManageForm: document.getElementById("subcategoryManageForm"),
+  editSubcategoryId: document.getElementById("editSubcategoryId"),
+  subcatParentId: document.getElementById("subcatParentId"),
   cancelSubcatFormBtn: document.getElementById("cancelSubcatFormBtn"),
-  slideFormPanel: document.getElementById("slideFormPanel"),
-  slideFormPanelTitle: document.getElementById("slideFormPanelTitle"),
-  slideManageForm: document.getElementById("slideManageForm"),
-  editSlideId: document.getElementById("editSlideId"),
-  slideTitleInput: document.getElementById("slideTitleInput"),
-  slideBadgeTextInput: document.getElementById("slideBadgeTextInput"),
-  slideBadgeStyleInput: document.getElementById("slideBadgeStyleInput"),
-  slideBgStyleInput: document.getElementById("slideBgStyleInput"),
-  slideIllustrationInput: document.getElementById("slideIllustrationInput"),
-  slideImageUrlGroup: document.getElementById("slideImageUrlGroup"),
-  slideImageUrlInput: document.getElementById("slideImageUrlInput"),
-  slideCtaTextInput: document.getElementById("slideCtaTextInput"),
-  slideCtaCategoryInput: document.getElementById("slideCtaCategoryInput"),
-  slideSubtitleInput: document.getElementById("slideSubtitleInput"),
-  cancelSlideFormBtn: document.getElementById("cancelSlideFormBtn"),
-  adminSlidesTableBody: document.getElementById("adminSlidesTableBody"),
+  slideFormPanel: document.createElement("div"),
+  slideFormPanelTitle: document.createElement("div"),
+  slideManageForm: document.createElement("form"),
+  editSlideId: document.createElement("input"),
+  slideTitleInput: document.createElement("input"),
+  slideBadgeTextInput: document.createElement("input"),
+  slideBadgeStyleInput: document.createElement("input"),
+  slideBgStyleInput: document.createElement("input"),
+  slideIllustrationInput: document.createElement("input"),
+  slideImageUrlGroup: document.createElement("div"),
+  slideImageUrlInput: document.createElement("input"),
+  slideCtaTextInput: document.createElement("input"),
+  slideCtaCategoryInput: document.createElement("input"),
+  slideSubtitleInput: document.createElement("input"),
+  cancelSlideFormBtn: document.createElement("button"),
+  adminSlidesTableBody: document.createElement("tbody"),
 
   // Forms & Newsletter
   newsletterForm: document.getElementById("newsletterForm"),
@@ -527,22 +595,13 @@ const elements = {
   checkoutName: document.getElementById("checkoutName"),
   checkoutPhone: document.getElementById("checkoutPhone"),
   checkoutAddress: document.getElementById("checkoutAddress"),
-  payMethodCard: document.getElementById("payMethodCard"),
-  payMethodUpi: document.getElementById("payMethodUpi"),
-  payMethodCod: document.getElementById("payMethodCod"),
-  cardInputs: document.getElementById("cardInputs"),
-  upiInputs: document.getElementById("upiInputs"),
-  codInfo: document.getElementById("codInfo"),
+  // Payment method pills removed (WhatsApp checkout)
   checkoutSummaryItems: document.getElementById("checkoutSummaryItems"),
   checkoutSubtotalSection: document.getElementById("checkoutSubtotal"),
   checkoutShippingSection: document.getElementById("checkoutShipping"),
   checkoutTaxSection: document.getElementById("checkoutTax"),
   checkoutGrandTotalSection: document.getElementById("checkoutGrandTotal"),
   checkoutPayBtn: document.getElementById("checkoutPayBtn"),
-  cardNumber: document.getElementById("cardNumber"),
-  cardExpiry: document.getElementById("cardExpiry"),
-  cardCvv: document.getElementById("cardCvv"),
-  upiId: document.getElementById("upiId")
 };
 
 function setUserLoginRole(role) {
@@ -556,56 +615,74 @@ function setUserLoginRole(role) {
 
 // All categories list
 const ALL_CATEGORIES = [
-  "Baby Essentials", "Baby Dresses", "Baby Basics", "Newborn Baby Kits", "Baby Footwear", "Baby Cosmetics", "Baby Grooming Products",
-  "Feeding & Care", "Feeding Accessories", "Feeding Pillows", "Feeding Bras",
-  "Toys & Entertainment", "Baby Toys", "Educational Toys", "Remote Control Cars", "Age-wise Games (0–10 Years)",
-  "Mobility", "Baby Walkers", "Baby Scooters",
-  "Books & Learning", "Baby Story Books", "Children's Comics", "Diary Notes",
-  "Women's Section", "Handbags", "Maternity Wear", "Feeding Nightwear", "Shapewear",
-  "Special Products", "Birthday Decorations", "Baby Height Meter", "Umbrella"
+  "New Born", "Clothing", "Feeding", "Baby Care", "Accessories", "Dresses",
+  "Mother Care or Maternity", "Inners",
+  "Toys", "Educational", "Board Games", "Remote Control", "Ride On Cars",
+  "Sports", "Tricycles", "Bicycles", "Foot Balls", "Volley Balls", "Basket Balls", "Carrom Board",
+  "Stationary", "Colouring Books", "Story Books", "Activity Books", "Colouring Accessories", "Colors", "Crayons", "Pencil", "Brushs",
+  "Gifts & Novelties", "Idols", "Photo Frames"
 ];
 
 // Category Details structure with icons & background colors for styling
 const CATEGORY_DETAILS = {
-  "Baby Essentials": [
-    { name: "Baby Dresses", icon: "", color: "#FFF3E0" },
-    { name: "Baby Basics", icon: "", color: "#E0F2F1" },
-    { name: "Newborn Baby Kits", icon: "", color: "#F3E5F5" },
-    { name: "Baby Footwear", icon: "", color: "#E8F5E9" },
-    { name: "Baby Cosmetics", icon: "", color: "#E1F5FE" },
-    { name: "Baby Grooming Products", icon: "", color: "#FFFDE7" }
+  "New Born": [
+    { name: "Clothing", icon: "", color: "#FFF3E0" },
+    { name: "Feeding", icon: "", color: "#E0F2F1" },
+    { name: "Baby Care", icon: "", color: "#F3E5F5" },
+    { name: "Accessories", icon: "", color: "#E8F5E9" },
+    { name: "Dresses", icon: "", color: "#E1F5FE" }
   ],
-  "Feeding & Care": [
-    { name: "Feeding Accessories", icon: "", color: "#E0F7FA" },
-    { name: "Feeding Pillows", icon: "", color: "#FFF8E1" },
-    { name: "Feeding Bras", icon: "", color: "#FFEBEE" }
+  "Mother Care or Maternity": [
+    { name: "Clothing", icon: "", color: "#FFFDE7" },
+    { name: "Inners", icon: "", color: "#E0F7FA" },
+    { name: "Accessories", icon: "", color: "#FFEBEE" }
   ],
-  "Toys & Entertainment": [
-    { name: "Baby Toys", icon: "", color: "#FFFDE7" },
-    { name: "Educational Toys", icon: "", color: "#E0F2F1" },
-    { name: "Remote Control Cars", icon: "", color: "#E8F5E9" },
-    { name: "Age-wise Games (0–10 Years)", icon: "", color: "#F3E5F5" }
+  "Toys": [
+    { name: "Educational", icon: "", color: "#FFF8E1" },
+    { name: "Board Games", icon: "", color: "#E0F2F1" },
+    { name: "Remote Control", icon: "", color: "#E8F5E9" },
+    { name: "Ride On Cars", icon: "", color: "#F3E5F5" }
   ],
-  "Mobility & Books": [
-    { name: "Baby Walkers", icon: "", color: "#E1F5FE" },
-    { name: "Baby Scooters", icon: "", color: "#FFF3E0" },
-    { name: "Baby Story Books", icon: "", color: "#FFF8E1" },
-    { name: "Children's Comics", icon: "", color: "#E0F7FA" },
-    { name: "Diary Notes", icon: "", color: "#E8F5E9" }
+  "Sports": [
+    { name: "Tricycles", icon: "", color: "#E1F5FE" },
+    { name: "Bicycles", icon: "", color: "#FFF3E0" },
+    { name: "Foot Balls", icon: "", color: "#FFF8E1" },
+    { name: "Volley Balls", icon: "", color: "#E0F7FA" },
+    { name: "Basket Balls", icon: "", color: "#E8F5E9" },
+    { name: "Carrom Board", icon: "", color: "#F3E5F5" }
   ],
-  "Moms & Special Collections": [
-    { name: "Handbags", icon: "", color: "#F3E5F5" },
-    { name: "Maternity Wear", icon: "", color: "#FFEBEE" },
-    { name: "Feeding Nightwear", icon: "", color: "#FFFDE7" },
-    { name: "Shapewear", icon: "", color: "#E0F2F1" },
-    { name: "Birthday Decorations", icon: "", color: "#FFF3E0" },
-    { name: "Baby Height Meter", icon: "", color: "#E1F5FE" },
-    { name: "Umbrella", icon: "", color: "#E8F5E9" }
+  "Stationary": [
+    { name: "Colouring Books", icon: "", color: "#FFFDE7" },
+    { name: "Story Books", icon: "", color: "#E0F2F1" },
+    { name: "Activity Books", icon: "", color: "#FFEBEE" },
+    { name: "Colouring Accessories", icon: "", color: "#E8F5E9" },
+    { name: "Colors", icon: "", color: "#FFF3E0" },
+    { name: "Crayons", icon: "", color: "#E1F5FE" },
+    { name: "Pencil", icon: "", color: "#F3E5F5" },
+    { name: "Brushs", icon: "", color: "#E0F7FA" }
+  ],
+  "Gifts & Novelties": [
+    { name: "Idols", icon: "", color: "#FFEBEE" },
+    { name: "Photo Frames", icon: "", color: "#FFF8E1" }
   ]
 };
 
+const DEFAULT_CATEGORIES_DATA = Object.keys(CATEGORY_DETAILS).map((groupName, i) => ({
+  _id: "local_cat_" + i,
+  name: groupName,
+  isActive: true,
+  showOnHome: true,
+  order: i,
+  image: "",
+  description: "Curated collection",
+  subcategories: CATEGORY_DETAILS[groupName].map((sub, j) => ({ 
+    name: sub.name, 
+    _id: "local_sub_" + i + "_" + j 
+  }))
+}));
+
 // Initialize Application
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   // 1. Hide Loader
   setTimeout(() => {
     elements.loader.style.opacity = "0";
@@ -614,6 +691,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Initialize Notifications
   initNotifications();
+
+  // Load backend products before rendering
+  await loadProducts();
 
   // 2. Render categories lists
   renderCategoryGroups();
@@ -674,7 +754,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // ── Auth: MongoDB JWT session only ──────────────────────────────────────
   const mongoUser = getStoredUser();
   if (mongoUser) {
-    renderLoggedInUI(mongoUser.name || mongoUser.email || "Parent");
+    renderLoggedInUI(mongoUser.name || mongoUser.email || "Parent", mongoUser.role);
   } else {
     renderLoggedOutUI();
   }
@@ -887,6 +967,62 @@ function initNavigationScrollSpy() {
   });
 }
 
+function cleanImageUrl(url) {
+  if (!url) return "";
+  let clean = url.trim();
+
+  // 1. Check for BBCode [img]...[/img]
+  const bbcodeRegex = /\[img\]([^\]\s]+)\[\/img\]/i;
+  const bbMatch = clean.match(bbcodeRegex);
+  if (bbMatch && bbMatch[1]) {
+    return bbMatch[1].trim();
+  }
+
+  // 2. Check for HTML <img src="..." />
+  const htmlRegex = /<img[^>]+src=["']([^"']+)["']/i;
+  const htmlMatch = clean.match(htmlRegex);
+  if (htmlMatch && htmlMatch[1]) {
+    return htmlMatch[1].trim();
+  }
+
+  // 3. Check for Markdown ![](url)
+  const mdRegex = /!\[.*?\]\((.*?)\)/;
+  const mdMatch = clean.match(mdRegex);
+  if (mdMatch && mdMatch[1]) {
+    return mdMatch[1].trim();
+  }
+
+  // 4. Strip BBCode url tags if present but not handled by regex
+  if (clean.includes("[url=") || clean.includes("[/url]")) {
+    clean = clean.replace(/\[\/?url.*?\]/gi, "");
+    clean = clean.replace(/\[\/?img\]/gi, "");
+  }
+
+  return clean;
+}
+
+function generateAutoDescription(name, categoryText) {
+  if (!name) return "";
+  
+  const cat = (categoryText || "").toLowerCase();
+  let desc = "";
+  
+  if (cat.includes("toy") || cat.includes("entertainment") || cat.includes("board games")) {
+    desc = `Premium quality ${name} designed to spark imagination and creativity. Made from safe, non-toxic materials, this product offers hours of educational fun and learning for children. Sturdy, durable construction makes it perfect for everyday play.`;
+  } else if (cat.includes("cloth") || cat.includes("dress") || cat.includes("born") || cat.includes("apparel") || cat.includes("feeding")) {
+    desc = `Ultra-soft and breathable ${name}, perfect for your little one's delicate skin. Crafted with 100% premium quality fabric to ensure comfort all day long. Features easy-to-use snaps or elastic waist for quick dressing. Ideal for playtime, outings, or casual wear.`;
+  } else if (cat.includes("mother") || cat.includes("maternity") || cat.includes("mom")) {
+    desc = `Designed with comfort and style in mind for mothers, this ${name} is made from gentle, premium-quality materials to support you. Extremely versatile, practical, and durably crafted to ensure maximum comfort and convenience.`;
+  } else if (cat.includes("sport") || cat.includes("active") || cat.includes("outdoor")) {
+    desc = `Encourage active play and coordination with this premium ${name}. Specially designed for kids, ensuring high safety standards and durable materials. Perfect for outdoor fun, family time, and building motor skills.`;
+  } else if (cat.includes("stationery") || cat.includes("book") || cat.includes("colour")) {
+    desc = `Inspire creativity and learning with our high-quality ${name}. Great for drawing, coloring, and early educational development. Child-safe and non-toxic, making it perfect for school projects or creative fun at home.`;
+  } else {
+    desc = `Beautiful and premium ${name}, crafted with care from high-quality, child-friendly materials. Highly durable, safe, and designed to bring joy and comfort to your little ones. Perfect for gifting or everyday use.`;
+  }
+  return desc;
+}
+
 // Setup Event Listeners
 function setupEventListeners() {
   // Left Side Nav Drawer Trigger (three lines button)
@@ -913,43 +1049,7 @@ function setupEventListeners() {
   elements.closeCustomerOrdersBtn.addEventListener("click", closeModal);
   elements.closeCheckoutPaymentBtn.addEventListener("click", closeModal);
 
-  // Payment Method Pill Switcher
-  const selectPaymentMethod = (method) => {
-    selectedPaymentMethod = method;
-    
-    // Toggle active classes on pills
-    elements.payMethodCard.classList.toggle("active", method === "card");
-    elements.payMethodUpi.classList.toggle("active", method === "upi");
-    elements.payMethodCod.classList.toggle("active", method === "cod");
-    
-    // Set active styles (borders & opacity)
-    elements.payMethodCard.style.borderColor = method === "card" ? "var(--dark-brown)" : "transparent";
-    elements.payMethodCard.style.opacity = method === "card" ? "1" : "0.6";
-    
-    elements.payMethodUpi.style.borderColor = method === "upi" ? "var(--dark-brown)" : "transparent";
-    elements.payMethodUpi.style.opacity = method === "upi" ? "1" : "0.6";
-    
-    elements.payMethodCod.style.borderColor = method === "cod" ? "var(--dark-brown)" : "transparent";
-    elements.payMethodCod.style.opacity = method === "cod" ? "1" : "0.6";
-    
-    // Toggle inputs visibility
-    elements.cardInputs.style.display = method === "card" ? "flex" : "none";
-    elements.upiInputs.style.display = method === "upi" ? "flex" : "none";
-    elements.codInfo.style.display = method === "cod" ? "block" : "none";
-    
-    // Update Pay Button text dynamically
-    if (method === "cod") {
-      elements.checkoutPayBtn.innerHTML = `Complete COD Order`;
-    } else if (method === "upi") {
-      elements.checkoutPayBtn.innerHTML = `Pay with UPI & Order`;
-    } else {
-      elements.checkoutPayBtn.innerHTML = `Complete Payment & Order`;
-    }
-  };
-  
-  elements.payMethodCard.addEventListener("click", () => selectPaymentMethod("card"));
-  elements.payMethodUpi.addEventListener("click", () => selectPaymentMethod("upi"));
-  elements.payMethodCod.addEventListener("click", () => selectPaymentMethod("cod"));
+  // Payment method elements removed (WhatsApp checkout — no payment pills needed)
 
   // Side Nav page navigation links click listeners
   elements.sideNavDrawer.querySelectorAll(".side-nav-link").forEach(link => {
@@ -1014,10 +1114,38 @@ function setupEventListeners() {
     elements.addNewProductBtn.style.display = "block";
   });
 
+  // Description Auto-Generation handlers
+  if (elements.autoGenDescBtn) {
+    elements.autoGenDescBtn.addEventListener("click", () => {
+      const name = elements.prodName.value.trim();
+      const catText = elements.prodCategory.selectedIndex >= 0 ? elements.prodCategory.options[elements.prodCategory.selectedIndex].text : "";
+      if (!name) {
+        showToast("Please enter a product name first", "error");
+        return;
+      }
+      const desc = generateAutoDescription(name, catText);
+      elements.prodDesc.value = desc;
+      showToast("Description generated!", "success");
+    });
+  }
+
+  const triggerAutoFill = () => {
+    if (!elements.prodDesc.value.trim()) {
+      const name = elements.prodName.value.trim();
+      const catText = elements.prodCategory.selectedIndex >= 0 ? elements.prodCategory.options[elements.prodCategory.selectedIndex].text : "";
+      if (name) {
+        elements.prodDesc.value = generateAutoDescription(name, catText);
+      }
+    }
+  };
+  elements.prodName.addEventListener("blur", triggerAutoFill);
+  elements.prodCategory.addEventListener("change", triggerAutoFill);
+  elements.prodImage.addEventListener("blur", () => {
+    elements.prodImage.value = cleanImageUrl(elements.prodImage.value);
+  });
   // Dashboard Add/Edit Form submit handler
-  elements.productManageForm.addEventListener("submit", (e) => {
+  elements.productManageForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
     const id = elements.editProductId.value;
     const name = elements.prodName.value.trim();
     const catValue = elements.prodCategory.value; // "categoryId|subcategoryId" or "categoryId|"
@@ -1041,40 +1169,42 @@ function setupEventListeners() {
     const price = parseFloat(elements.prodPrice.value);
     const originalPriceInput = elements.prodOriginalPrice.value;
     const originalPrice = originalPriceInput ? parseFloat(originalPriceInput) : null;
-    const image = elements.prodImage.value.trim();
-    const inStock = elements.prodStock.value === "true";
-    const desc = elements.prodDesc.value.trim();
-    const isNew = elements.prodIsNew.checked;
-    const isSale = elements.prodIsSale.checked;
-
-    // Deduce age group based on category or default to all
-    let ageGroup = "All";
-    if (category.toLowerCase().includes("toys") || category.toLowerCase().includes("new born")) {
-      ageGroup = "0-1";
-    }
-
-    const productData = {
-      name, category, categoryId, subcategoryId, price, originalPrice, image, 
-      inStock, description: desc, isNew, isSale, ageGroup
+    const image = cleanImageUrl(elements.prodImage.value);
+    const imagesValue = elements.prodImages.value || "";
+    const images = imagesValue.split("\n")
+      .map(url => cleanImageUrl(url))
+      .filter(url => url !== "");
+    
+    const newProd = {
+      name: elements.prodName.value.trim(),
+      price: parseFloat(elements.prodPrice.value),
+      originalPrice: elements.prodOriginalPrice.value ? parseFloat(elements.prodOriginalPrice.value) : null,
+      categoryId: categoryId,
+      subcategoryId: subcategoryId,
+      category: elements.prodCategory.options[elements.prodCategory.selectedIndex]?.text.replace(/-- /g, '').replace(/ --/g, '') || "Uncategorized",
+      image: image,
+      images: images,
+      inStock: elements.prodStock.value === "true",
+      description: elements.prodDesc.value,
+      isNew: elements.prodIsNew.checked,
+      isSale: elements.prodIsSale.checked,
+      ageGroup: elements.prodAgeGroup ? elements.prodAgeGroup.value : "All"
     };
 
     try {
       if (id) {
-        // Edit mode
-        await apiUpdateProduct(id, productData);
-        showToast("Product updated successfully!", "success");
+        await apiUpdateProduct(id, newProd);
+        showToast("Product updated successfully", "success");
       } else {
-        // Create mode
-        await apiCreateProduct(productData);
-        showToast("New product created successfully!", "success");
+        await apiCreateProduct(newProd);
+        showToast("Product created successfully", "success");
       }
-
+      
+      // Reload products and UI
+      await loadProducts();
       elements.productFormPanel.style.display = "none";
       elements.addNewProductBtn.style.display = "block";
       elements.productManageForm.reset();
-      
-      // Refresh views from backend
-      await loadProducts();
       renderAdminProductsTable();
       renderCategoryGroups();
     } catch (err) {
@@ -1179,13 +1309,15 @@ function setupEventListeners() {
     elements.addNewSlideBtn.style.display = "block";
   });
 
-  // Show/hide custom image url field depending on selection
   elements.slideIllustrationInput.addEventListener("change", (e) => {
-    if (e.target.value === "custom") {
+    if (e.target.value === "custom" || e.target.value === "custom-full") {
       elements.slideImageUrlGroup.style.display = "flex";
     } else {
       elements.slideImageUrlGroup.style.display = "none";
     }
+  });
+  elements.slideImageUrlInput.addEventListener("blur", () => {
+    elements.slideImageUrlInput.value = cleanImageUrl(elements.slideImageUrlInput.value);
   });
 
   // Slide Manage Form submit
@@ -1199,7 +1331,7 @@ function setupEventListeners() {
       badgeStyle: elements.slideBadgeStyleInput.value,
       bgStyle: elements.slideBgStyleInput.value,
       illustration: elements.slideIllustrationInput.value,
-      imageUrl: elements.slideImageUrlInput.value.trim(),
+      imageUrl: cleanImageUrl(elements.slideImageUrlInput.value),
       ctaText: elements.slideCtaTextInput.value.trim(),
       ctaCategory: elements.slideCtaCategoryInput.value,
       subtitle: elements.slideSubtitleInput.value.trim()
@@ -1311,7 +1443,7 @@ function setupEventListeners() {
         throw new Error("This account does not have admin access.");
       }
 
-      renderLoggedInUI(user.name || user.email);
+      renderLoggedInUI(user.name || user.email, user.role);
 
       if (loginRole === "admin") {
         showToast("Admin login successful! 👋", "success");
@@ -1354,7 +1486,7 @@ function setupEventListeners() {
     try {
       const result = await apiRegister(name, email, phone, password);
       const user = result.user;
-      renderLoggedInUI(user.name || user.email);
+      renderLoggedInUI(user.name || user.email, user.role);
       showToast(`Account created! Welcome, ${user.name}! 🎉`, "success");
       closeModal();
       elements.userRegisterForm.reset();
@@ -1394,7 +1526,7 @@ function setupEventListeners() {
       elements.searchSuggestions.innerHTML = `<div class="search-suggestion-empty">No results found for "${e.target.value}"</div>`;
     } else {
       elements.searchSuggestions.innerHTML = matches.map(prod => `
-        <div class="search-suggestion-item" data-id="${prod.id}">
+        <div class="search-suggestion-item" data-id="${prod._id || prod.id}">
           <img src="${prod.image}" alt="${prod.name}" class="search-suggest-img">
           <div class="search-suggest-info">
             <span class="search-suggest-title">${prod.name}</span>
@@ -1405,7 +1537,7 @@ function setupEventListeners() {
       
       elements.searchSuggestions.querySelectorAll(".search-suggestion-item").forEach(item => {
         item.addEventListener("click", () => {
-          const id = parseInt(item.getAttribute("data-id"));
+          const id = item.getAttribute("data-id");
           openQuickView(id);
           elements.searchSuggestions.style.display = "none";
           elements.searchInput.value = "";
@@ -1474,14 +1606,9 @@ function setupEventListeners() {
       elements.checkoutName.value = name;
       elements.checkoutPhone.value = phone;
       elements.checkoutAddress.value = address;
-      
-      // Reset payment method to card default
-      selectedPaymentMethod = "card";
-      elements.payMethodCard.click(); // Trigger layout update
 
-      // Render Order Summary
       const subtotal = cart.reduce((sum, item) => {
-        const prod = PRODUCTS.find(p => p.id === item.productId || p.id === Number(item.productId));
+        const prod = getProductByIdLocal(item.productId);
         return sum + (prod ? prod.price * item.quantity : 0);
       }, 0);
 
@@ -1497,7 +1624,7 @@ function setupEventListeners() {
 
       // Populate items list
       elements.checkoutSummaryItems.innerHTML = cart.map(item => {
-        const prod = PRODUCTS.find(p => p.id === item.productId || p.id === Number(item.productId));
+        const prod = getProductByIdLocal(item.productId);
         if (!prod) return '';
         return `
           <div style="display: flex; gap: 10px; align-items: center; background-color: var(--cream); padding: 8px; border-radius: var(--border-radius-sm);">
@@ -1521,7 +1648,7 @@ function setupEventListeners() {
     }
   });
 
-  // Payment Submission flow
+  // Payment Submission flow (WhatsApp Checkout)
   elements.checkoutPayBtn.addEventListener("click", async () => {
     // 1. Get Form values
     const name = elements.checkoutName.value.trim();
@@ -1545,199 +1672,92 @@ function setupEventListeners() {
       return;
     }
 
-    // Helper to reset fields & button state on failure/cancel
-    const resetPayBtnState = () => {
-      elements.checkoutPayBtn.disabled = false;
-      elements.checkoutName.disabled = false;
-      elements.checkoutPhone.disabled = false;
-      elements.checkoutAddress.disabled = false;
-      elements.cardNumber.disabled = false;
-      elements.cardExpiry.disabled = false;
-      elements.cardCvv.disabled = false;
-      elements.upiId.disabled = false;
-      elements.payMethodCard.style.pointerEvents = "auto";
-      elements.payMethodUpi.style.pointerEvents = "auto";
-      elements.payMethodCod.style.pointerEvents = "auto";
-      
-      if (selectedPaymentMethod === "cod") {
-        elements.checkoutPayBtn.innerHTML = `Complete COD Order`;
-      } else if (selectedPaymentMethod === "upi") {
-        elements.checkoutPayBtn.innerHTML = `Pay with UPI & Order`;
-      } else {
-        elements.checkoutPayBtn.innerHTML = `Complete Payment & Order`;
-      }
-    };
-
     // 3. Calculate total amounts
     const subtotal = cart.reduce((sum, item) => {
-      const prod = PRODUCTS.find(p => p.id === item.productId || p.id === Number(item.productId));
+      const prod = getProductByIdLocal(item.productId);
       return sum + (prod ? prod.price * item.quantity : 0);
     }, 0);
     const shipping = subtotal > 1500 ? 0 : 99;
     const tax = Math.round(subtotal * 0.18);
     const grandTotal = subtotal + shipping + tax;
-    const deliveryDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
-    // 4. Disable all fields during processing
-    elements.checkoutPayBtn.disabled = true;
-    elements.checkoutName.disabled = true;
-    elements.checkoutPhone.disabled = true;
-    elements.checkoutAddress.disabled = true;
-    elements.cardNumber.disabled = true;
-    elements.cardExpiry.disabled = true;
-    elements.cardCvv.disabled = true;
-    elements.upiId.disabled = true;
-    elements.payMethodCard.style.pointerEvents = "none";
-    elements.payMethodUpi.style.pointerEvents = "none";
-    elements.payMethodCod.style.pointerEvents = "none";
-
-    if (selectedPaymentMethod === "cod") {
-      // Cash on Delivery — save to MongoDB
-      try {
-        elements.checkoutPayBtn.innerHTML = `Placing Order...`;
-
-        const mappedItems = cart.map(item => {
-          const prod = PRODUCTS.find(p => p.id === item.productId || p.id === Number(item.productId));
-          return {
-            productId: String(item.productId),
-            name: prod?.name || "Unknown Product",
-            price: prod?.price || 0,
-            quantity: item.quantity || 1,
-            image: prod?.image || ""
-          };
-        });
-
-        const mongoResult = await apiPlaceOrder({
-          items: mappedItems,
-          totalAmount: grandTotal,
-          paymentStatus: "pending",
-          shippingAddress: {
-            fullName: name,
-            addressLine1: address,
-            city: "-",
-            state: "-",
-            pincode: "-",
-            phone: phone
-          }
-        });
-
-        const orderId = mongoResult.order._id;
-        showToast(`🎉 Order placed! Invoice: ${orderId}`, "success");
-
-        cart = [];
-        localStorage.setItem("mt_cart", JSON.stringify(cart));
-        renderCart();
-        updateBadges();
-        closeModal();
-      } catch (err) {
-        showToast("Order placement failed: " + err.message, "error");
-        resetPayBtnState();
-      }
-    } else {
-      // Razorpay Payment flow
-      try {
-        elements.checkoutPayBtn.innerHTML = `Initiating Secure Payment...`;
-
-        // Step 1: Create order on backend Express server
-        const orderResult = await apiCreateRazorpayOrder(grandTotal, "INR");
-        
-        if (!orderResult.success) {
-          throw new Error(orderResult.message || "Failed to create Razorpay order");
-        }
-
-        const razorpayOrder = orderResult;
-
-        // Step 2: Save the "Pending" order to our MongoDB so we have a dbOrderId
-        const mappedItems = cart.map(item => {
-          const prod = PRODUCTS.find(p => p.id === item.productId || p.id === Number(item.productId));
-          return {
-            productId: String(item.productId),
-            name: prod?.name || "Unknown Product",
-            price: prod?.price || 0,
-            quantity: item.quantity || 1,
-            image: prod?.image || ""
-          };
-        });
-
-        const mongoResult = await apiPlaceOrder({
-          items: mappedItems,
-          totalAmount: grandTotal,
-          paymentStatus: "pending",
-          shippingAddress: {
-            fullName: name,
-            addressLine1: address,
-            city: "-", state: "-", pincode: "-", phone: phone
-          }
-        });
-        
-        const dbOrderId = mongoResult.order._id;
-
-        // Step 3: Configure Razorpay Checkout options
-        const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_replace_me",
-          amount: razorpayOrder.amount,
-          currency: razorpayOrder.currency,
-          name: "Mother & Toddler Shop",
-          description: "Premium Baby Products & Toys",
-          order_id: razorpayOrder.orderId,
-          handler: async function (paymentRes) {
-            try {
-              elements.checkoutPayBtn.innerHTML = `Verifying Payment Signature...`;
-
-              // Step 4: Send payment results to backend for verification
-              const verifyResult = await apiVerifyPayment({
-                razorpay_order_id: paymentRes.razorpay_order_id,
-                razorpay_payment_id: paymentRes.razorpay_payment_id,
-                razorpay_signature: paymentRes.razorpay_signature,
-                dbOrderId: dbOrderId
-              });
-
-              if (verifyResult.success) {
-                showToast(`🎉 Payment successful! Invoice: ${dbOrderId}`, "success");
-
-                // Clear Cart & Reset UI
-                cart = [];
-                localStorage.setItem("mt_cart", JSON.stringify(cart));
-                renderCart();
-                updateBadges();
-                closeModal();
-              } else {
-                showToast("Verification failed: " + verifyResult.message, "error");
-                resetPayBtnState();
-              }
-            } catch (verifyErr) {
-              showToast("Error verifying payment: " + verifyErr.message, "error");
-              resetPayBtnState();
-            }
-          },
-          prefill: {
-            name: name,
-            email: getStoredUser()?.email || "",
-            contact: phone
-          },
-          theme: { color: "#FB8C00" },
-          modal: {
-            ondismiss: function () {
-              showToast("Payment checkout cancelled", "error");
-              resetPayBtnState();
-            }
-          }
+    // 4. Save order to backend database
+    try {
+      elements.checkoutPayBtn.disabled = true;
+      elements.checkoutPayBtn.innerHTML = `Creating Order...`;
+      elements.checkoutName.disabled = true;
+      elements.checkoutPhone.disabled = true;
+      elements.checkoutAddress.disabled = true;
+      
+      const mappedItems = cart.map(item => {
+        const prod = getProductByIdLocal(item.productId);
+        return {
+          productId: String(item.productId),
+          name: prod?.name || "Unknown Product",
+          price: prod?.price || 0,
+          quantity: item.quantity || 1,
+          image: prod?.image || ""
         };
+      });
 
-        const rzp = new window.Razorpay(options);
-        
-        // Handle payment failure event
-        rzp.on('payment.failed', function (paymentErr) {
-          showToast(`Payment failed: ${paymentErr.error.description}`, "error");
-          resetPayBtnState();
-        });
+      const mongoResult = await apiPlaceOrder({
+        items: mappedItems,
+        totalAmount: grandTotal,
+        paymentStatus: "pending",
+        shippingAddress: {
+          fullName: name,
+          addressLine1: address,
+          city: "-",
+          state: "-",
+          pincode: "-",
+          phone: phone
+        }
+      });
 
-        // Step 4: Open Razorpay checkout popup
-        rzp.open();
-      } catch (paymentInitErr) {
-        showToast("Payment initialization failed: " + paymentInitErr.message, "error");
-        resetPayBtnState();
-      }
+      const orderId = mongoResult.order._id;
+
+      // 5. Construct WhatsApp message
+      let itemsListText = cart.map(item => {
+        const prod = getProductByIdLocal(item.productId);
+        return `• *${prod?.name || "Product"}* (x${item.quantity}) - ₹${(prod ? prod.price * item.quantity : 0).toLocaleString('en-IN')}`;
+      }).join("\n");
+
+      const whatsappMessage = `*New Order from Mother & Toddler Shop!* 🛍️\n\n` +
+        `*Invoice ID:* ${orderId}\n\n` +
+        `*Customer Details:*\n` +
+        `- *Name:* ${name}\n` +
+        `- *Phone:* ${phone}\n` +
+        `- *Address:* ${address}\n\n` +
+        `*Items Ordered:*\n${itemsListText}\n\n` +
+        `*Order Summary:*\n` +
+        `- *Subtotal:* ₹${subtotal.toLocaleString('en-IN')}\n` +
+        `- *Shipping:* ${shipping === 0 ? "FREE" : "₹" + shipping}\n` +
+        `- *GST (Tax):* ₹${tax.toLocaleString('en-IN')}\n` +
+        `- *Grand Total:* *₹${grandTotal.toLocaleString('en-IN')}*\n\n` +
+        `Please confirm this order and arrange delivery. Thank you!`;
+
+      const encodedMessage = encodeURIComponent(whatsappMessage);
+      const whatsappUrl = `https://wa.me/919949911776?text=${encodedMessage}`;
+
+      showToast(`🎉 Order placed! Redirecting to WhatsApp...`, "success");
+
+      // Open WhatsApp link in a new window/tab
+      window.open(whatsappUrl, "_blank");
+
+      // Clear cart & Reset UI
+      cart = [];
+      localStorage.setItem("mt_cart", JSON.stringify(cart));
+      renderCart();
+      updateBadges();
+      closeModal();
+    } catch (err) {
+      showToast("Order placement failed: " + err.message, "error");
+    } finally {
+      elements.checkoutPayBtn.disabled = false;
+      elements.checkoutPayBtn.innerHTML = `Order via WhatsApp`;
+      elements.checkoutName.disabled = false;
+      elements.checkoutPhone.disabled = false;
+      elements.checkoutAddress.disabled = false;
     }
   });
 
@@ -1753,45 +1773,111 @@ function setupEventListeners() {
 }
 
 // Render category lists in sidebar nav dynamically
-function renderSidebarCategories() {
-  const mainCategoriesList = [
-    "Baby Dresses", "Baby Toys", "Feeding Accessories", "Maternity Wear", "Baby Story Books", "Handbags"
-  ];
-  
-  elements.sideNavCategoriesList.innerHTML = mainCategoriesList.map(cat => {
-    return `
+async function renderSidebarCategories() {
+  try {
+    const res = await apiGetCategories();
+    let categories = res.data || [];
+    if (categories.length === 0) categories = DEFAULT_CATEGORIES_DATA;
+    const activeCats = categories.filter(c => c.isActive).sort((a, b) => a.order - b.order);
+    
+    elements.sideNavCategoriesList.innerHTML = activeCats.map(cat => `
       <li>
-        <button class="side-nav-category-item" data-side-cat="${cat}" style="width: 100%; text-align: left; background: none; border: none; font-size: 0.95rem; font-weight: 700; color: var(--dark-brown); cursor: pointer; padding: 6px 0; display: block;">
-          ${cat} ➔
+        <button class="side-nav-category-item" data-side-cat="${cat.name}" style="width: 100%; text-align: left; background: none; border: none; font-size: 0.95rem; font-weight: 700; color: var(--dark-brown); cursor: pointer; padding: 6px 0; display: block;">
+          ${cat.name} ➔
         </button>
       </li>
-    `;
-  }).join("");
+    `).join("");
 
-  // Category item click listeners in sidebar
-  elements.sideNavCategoriesList.querySelectorAll(".side-nav-category-item").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const cat = btn.getAttribute("data-side-cat");
-      selectedCategory = cat;
-      selectedAgeGroup = "all"; // Reset age filter
-      
-      // Highlight storefront category filter tab
-      elements.filterTabs.querySelectorAll(".filter-tab").forEach(tab => tab.classList.remove("active"));
-      let matchedTab = false;
-      elements.filterTabs.querySelectorAll(".filter-tab").forEach(tab => {
-        if (tab.getAttribute("data-category").toLowerCase() === cat.toLowerCase()) {
-          tab.classList.add("active");
-          matchedTab = true;
+    // Category item click listeners in sidebar
+    elements.sideNavCategoriesList.querySelectorAll(".side-nav-category-item").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const cat = btn.getAttribute("data-side-cat");
+        selectedCategory = cat;
+        selectedAgeGroup = "all"; // Reset age filter
+        
+        // Highlight storefront category filter tab
+        if (elements.filterTabs) {
+          elements.filterTabs.querySelectorAll(".filter-tab").forEach(tab => tab.classList.remove("active"));
+          elements.filterTabs.querySelectorAll(".filter-tab").forEach(tab => {
+            if (tab.getAttribute("data-category").toLowerCase() === cat.toLowerCase()) {
+              tab.classList.add("active");
+            }
+          });
         }
-      });
 
-      renderProducts();
-      closeAllDrawers();
-      
-      document.getElementById("products").scrollIntoView({ behavior: 'smooth' });
-      showToast(`Showing ${cat}`, "success");
+        renderProducts();
+        closeAllDrawers();
+        
+        document.getElementById("products").scrollIntoView({ behavior: 'smooth' });
+        showToast(`Showing ${cat}`, "success");
+      });
     });
-  });
+  } catch (err) {
+    console.error("Failed to load sidebar categories", err);
+  }
+}
+
+// Helper to map category names to beautiful line SVGs instead of emojis
+function getPremiumCategoryIcon(categoryName) {
+  const name = categoryName.toLowerCase();
+  
+  if (name.includes("new born") || name.includes("newborn")) {
+    return `<svg class="cat-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="21" r="2" />
+      <circle cx="18" cy="21" r="2" />
+      <path d="M12 15V5c0-1.1-.9-2-2-2H4" />
+      <path d="M19 9a7 7 0 0 0-7 7h9v-3a4 4 0 0 0-2-4z" />
+      <path d="M12 15h9a3 3 0 0 0-3-3h-6" />
+    </svg>`;
+  }
+  if (name.includes("mother") || name.includes("maternity") || name.includes("mom")) {
+    return `<svg class="cat-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+      <circle cx="12" cy="9" r="2.5" />
+      <path d="M8 14c1 1.5 3 2 4 2s3-.5 4-2" />
+    </svg>`;
+  }
+  if (name.includes("toy")) {
+    return `<svg class="cat-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="8" height="8" rx="1.5" />
+      <circle cx="7" cy="15" r="1.5" />
+      <rect x="13" y="11" width="8" height="8" rx="1.5" />
+      <line x1="17" y1="13" x2="17" y2="17" />
+      <line x1="15" y1="15" x2="19" y2="15" />
+      <path d="M12 2L6 9h12z" />
+    </svg>`;
+  }
+  if (name.includes("sport") || name.includes("play")) {
+    return `<svg class="cat-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M6.2 6.2a8 8 0 0 0 11.6 11.6" />
+      <path d="M17.8 6.2a8 8 0 0 0-11.6 11.6" />
+      <path d="M12 2v20" />
+      <path d="M2 12h20" />
+    </svg>`;
+  }
+  if (name.includes("stationery") || name.includes("book")) {
+    return `<svg class="cat-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      <line x1="9" y1="6" x2="15" y2="6" />
+      <line x1="9" y1="10" x2="15" y2="10" />
+      <line x1="9" y1="14" x2="13" y2="14" />
+    </svg>`;
+  }
+  if (name.includes("gift") || name.includes("novelty")) {
+    return `<svg class="cat-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="8" width="18" height="13" rx="2" />
+      <line x1="12" y1="8" x2="12" y2="21" />
+      <line x1="3" y1="13" x2="21" y2="13" />
+      <path d="M12 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+      <path d="M12 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3z" />
+    </svg>`;
+  }
+  
+  return `<svg class="cat-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+  </svg>`;
 }
 
 // Render dynamic categories on homepage
@@ -1801,7 +1887,8 @@ async function renderCategoryGroups() {
   
   try {
     const res = await apiGetCategories();
-    const categories = res.data || [];
+    let categories = res.data || [];
+    if (categories.length === 0) categories = DEFAULT_CATEGORIES_DATA;
     
     // Filter categories that should show on home and sort by order
     const homeCategories = categories
@@ -1835,20 +1922,34 @@ async function renderCategoryGroups() {
       
       let mediaHtml = '';
       if (cat.image) {
-        mediaHtml = `<div style="height: 140px; overflow: hidden; border-radius: var(--border-radius-md); margin-bottom: 15px;"><img src="${cat.image}" alt="${cat.name}" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+        mediaHtml = `<div style="width: 100%; height: 140px; overflow: hidden; border-radius: var(--border-radius-md); margin-bottom: 15px; box-shadow: var(--shadow-sm);"><img src="${cat.image}" alt="${cat.name}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform=''"></div>`;
       } else {
-        mediaHtml = `<div class="category-icon-container" style="color: ${iconColor}; display: flex; justify-content: center; margin-bottom: 12px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); font-size: 4rem;">
-          ${cat.icon || '📁'}
+        const svgIcon = getPremiumCategoryIcon(cat.name);
+        mediaHtml = `<div class="category-icon-container" style="color: ${iconColor};">
+          ${svgIcon}
         </div>`;
       }
       
+      // Build subcategory pills
+      let subcatHtml = '';
+      if (cat.subcategories && cat.subcategories.length > 0) {
+        subcatHtml = `<div class="subcat-pills-container">`;
+        cat.subcategories.forEach(sub => {
+          subcatHtml += `<span class="subcat-pill" data-category="${cat.name}" data-subcat="${sub.name}" data-subcatid="${sub._id}">${sub.name}</span>`;
+        });
+        subcatHtml += `</div>`;
+      }
+
       html += `
-        <div class="primary-category-card" data-category="${cat.name}" data-id="${cat._id}" style="background: ${gradient}; border-radius: var(--border-radius-lg); padding: 25px 20px; text-align: center; cursor: pointer; box-shadow: var(--shadow-md); border: 3px solid #FFF; transition: var(--transition-bounce);">
-          ${mediaHtml}
-          <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 6px;">${cat.name}</h3>
-          <p style="font-size: 0.9rem; color: var(--light-brown); margin: 0; min-height: 40px; display: flex; align-items: center; justify-content: center;">${cat.description || 'Discover our curated collection'}</p>
-          <div style="margin-top: 15px;">
-             <span style="font-size: 0.85rem; background: var(--dark-brown); padding: 8px 16px; border-radius: 20px; color: white; font-weight: 700; display: inline-block; transition: all 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">View Products</span>
+        <div class="primary-category-card" data-category="${cat.name}" data-id="${cat._id}" style="background: ${gradient};">
+          <div style="width: 100%; display: flex; flex-direction: column; align-items: center; flex-grow: 1;">
+            ${mediaHtml}
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 4px;">${cat.name}</h3>
+            <p style="font-size: 0.85rem; color: var(--light-brown); margin: 0; line-height: 1.3;">${cat.description || 'Curated collection'}</p>
+            ${subcatHtml}
+          </div>
+          <div style="margin-top: 16px; width: 100%; display: flex; justify-content: center;">
+             <span class="view-all-btn" style="font-size: 0.75rem;">View All →</span>
           </div>
         </div>
       `;
@@ -1856,18 +1957,35 @@ async function renderCategoryGroups() {
     
     dynamicCategoriesGrid.innerHTML = html;
     
-    // Attach click events
+    // Attach click events to the entire category card
     document.querySelectorAll(".primary-category-card").forEach(card => {
       card.addEventListener("click", () => {
         const catName = card.getAttribute("data-category");
         selectedCategory = catName;
-        selectedAgeGroup = "all"; // Reset age filter
-        
+        selectedAgeGroup = "all";
+        searchQuery = "";
+        elements.searchInput.value = "";
         renderProducts();
-        
-        // Scroll to products
         const productsSection = document.getElementById("products");
         if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth' });
+        showToast(`Showing all ${catName}`, "success");
+      });
+    });
+
+    // Attach click events for subcategory pills (stops propagation so whole card click doesn't trigger)
+    document.querySelectorAll(".subcat-pill").forEach(pill => {
+      pill.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const catName = pill.getAttribute("data-category");
+        const subName = pill.getAttribute("data-subcat");
+        selectedCategory = catName;
+        selectedAgeGroup = "all";
+        searchQuery = subName.toLowerCase();
+        elements.searchInput.value = subName;
+        renderProducts();
+        const productsSection = document.getElementById("products");
+        if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth' });
+        showToast(`Showing ${catName} › ${subName}`, "success");
       });
     });
     
@@ -1884,7 +2002,7 @@ function renderSubcategoryFilters(categories) {
   // Find or create the filter-tabs container
   let filterTabsContainer = elements.filterTabs;
   if (filterTabsContainer) {
-    filterTabsContainer.innerHTML = `<button class="filter-tab active" data-category="All">All Categories</button>`;
+    filterTabsContainer.innerHTML = `<button class="filter-tab active" data-category="all">All Categories</button>`;
     
     categories.forEach(cat => {
       filterTabsContainer.innerHTML += `<button class="filter-tab" data-category="${cat.name}">${cat.name}</button>`;
@@ -1940,9 +2058,13 @@ function renderProducts() {
   }
 
   let filtered = PRODUCTS.filter(prod => {
-    const matchesCategory = selectedCategory === "all" || prod.category.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesCategory = selectedCategory === "all" || 
+      (prod.category && prod.category.toLowerCase().startsWith(selectedCategory.toLowerCase()));
+      
     const matchesAgeGroup = selectedAgeGroup === "all" || prod.ageGroup === selectedAgeGroup || prod.ageGroup === "All";
-    const matchesSearch = prod.name.toLowerCase().includes(searchQuery) || prod.category.toLowerCase().includes(searchQuery);
+    const matchesSearch = prod.name && (prod.name.toLowerCase().includes(searchQuery) || 
+      (prod.category && prod.category.toLowerCase().includes(searchQuery)));
+      
     return matchesCategory && matchesAgeGroup && matchesSearch;
   });
 
@@ -1957,7 +2079,7 @@ function renderProducts() {
   }
 
   elements.productsGrid.innerHTML = filtered.map(prod => {
-    const isWished = wishlist.includes(prod.id) || wishlist.includes(String(prod.id)) || wishlist.includes(Number(prod.id));
+    const isWished = wishlist.includes(prod._id) || wishlist.includes(prod.id) || wishlist.includes(String(prod.id)) || wishlist.includes(Number(prod.id));
     
     // Calculate discount percentage
     let discountBadge = "";
@@ -1969,31 +2091,31 @@ function renderProducts() {
     }
 
     return `
-      <div class="product-card" onclick="openQuickView(${prod.id})" style="cursor: pointer; animation: fadeIn 0.5s ease forwards; ${!prod.inStock ? 'opacity: 0.7;' : ''}">
+      <div class="product-card" onclick="openQuickView('${prod._id || prod.id}')" style="cursor: pointer; animation: fadeIn 0.5s ease forwards; ${!prod.inStock ? 'opacity: 0.7;' : ''}">
         <div class="product-badges">
           ${prod.isNew ? '<span class="badge-tag badge-new">NEW</span>' : ''}
           ${prod.isSale ? '<span class="badge-tag badge-sale">SALE</span>' : ''}
           ${discountBadge}
           ${!prod.inStock ? '<span class="badge-tag" style="background-color: #E0E0E0; color: #757575;">OUT OF STOCK</span>' : ''}
         </div>
-        <button class="wishlist-toggle-btn ${isWished ? 'wished' : ''}" onclick="event.stopPropagation(); toggleWishlist(${prod.id})" title="Add to Wishlist">
+        <button class="wishlist-toggle-btn ${isWished ? 'wished' : ''}" onclick="event.stopPropagation(); toggleWishlist('${prod._id || prod.id}')" title="Add to Wishlist">
           <svg viewBox="0 0 24 24">
             <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.41,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.59,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>
           </svg>
         </button>
-        <div class="product-img-wrapper" onclick="openQuickView(${prod.id})">
+        <div class="product-img-wrapper" onclick="openQuickView('${prod._id || prod.id}')">
           <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy">
           <div class="product-actions-overlay">
-            <button class="product-overlay-btn" onclick="event.stopPropagation(); openQuickView(${prod.id})">Quick View</button>
+            <button class="product-overlay-btn" onclick="event.stopPropagation(); openQuickView('${prod._id || prod.id}')">Quick View</button>
           </div>
         </div>
         <div class="product-info">
           <span class="product-category">${prod.category} ${prod.ageGroup && prod.ageGroup !== 'All' ? `• Age: ${prod.ageGroup} Yrs` : ''}</span>
-          <h3 class="product-name" onclick="openQuickView(${prod.id})">${prod.name}</h3>
+          <h3 class="product-name" onclick="openQuickView('${prod._id || prod.id}')">${prod.name}</h3>
           <div class="product-rating">
-            <span>${prod.rating.toFixed(1)}</span>
+            <span>${(prod.rating || 5).toFixed(1)}</span>
             <svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>
-            <span class="rating-count">(${prod.id * 7 + 12})</span>
+            <span class="rating-count">(${prod.reviews ? prod.reviews.length : 0})</span>
           </div>
           <div class="product-price-row">
             <div class="price-container">
@@ -2029,11 +2151,10 @@ function renderCart() {
 
   let total = 0;
   elements.cartDrawerBody.innerHTML = cart.map(item => {
-    const prod = PRODUCTS.find(p => p.id === item.productId);
+    const prod = getProductByIdLocal(item.productId);
     if (!prod) return '';
     const itemSubtotal = prod.price * item.quantity;
     total += itemSubtotal;
-    
     return `
       <div class="drawer-item">
         <img src="${prod.image}" alt="${prod.name}" class="drawer-item-img">
@@ -2041,12 +2162,12 @@ function renderCart() {
           <h4 class="drawer-item-title">${prod.name}</h4>
           <span class="drawer-item-price">₹${prod.price.toLocaleString('en-IN')}</span>
           <div class="drawer-item-qty">
-            <button class="qty-btn" onclick="updateCartQuantity(${prod.id}, ${item.quantity - 1})">-</button>
+            <button class="qty-btn" onclick="updateCartQuantity('${prod._id || prod.id}', ${item.quantity - 1})">-</button>
             <span style="font-weight: bold; font-size: 0.95rem;">${item.quantity}</span>
-            <button class="qty-btn" onclick="updateCartQuantity(${prod.id}, ${item.quantity + 1})">+</button>
+            <button class="qty-btn" onclick="updateCartQuantity('${prod._id || prod.id}', ${item.quantity + 1})">+</button>
           </div>
         </div>
-        <button class="drawer-item-remove" onclick="removeFromCart(${prod.id})" title="Remove item">
+        <button class="drawer-item-remove" onclick="removeFromCart('${prod._id || prod.id}')" title="Remove item">
           <svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>
         </button>
       </div>
@@ -2055,7 +2176,6 @@ function renderCart() {
 
   elements.cartSubtotal.textContent = `₹${total.toLocaleString('en-IN')}`;
 }
-
 // Render wishlist saved items inside the sliding wishlist drawer in Rupees
 function renderWishlist() {
   if (wishlist.length === 0) {
@@ -2072,7 +2192,7 @@ function renderWishlist() {
   }
 
   elements.wishlistDrawerBody.innerHTML = wishlist.map(id => {
-    const prod = PRODUCTS.find(p => p.id === id);
+    const prod = getProductByIdLocal(id);
     if (!prod) return '';
 
     return `
@@ -2082,12 +2202,12 @@ function renderWishlist() {
           <h4 class="drawer-item-title">${prod.name}</h4>
           <span class="drawer-item-price">₹${prod.price.toLocaleString('en-IN')}</span>
           ${prod.inStock ? `
-            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-top: 8px; border-radius: 20px;" onclick="moveWishlistToCart(${prod.id})">
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-top: 8px; border-radius: 20px;" onclick="moveWishlistToCart('${prod._id || prod.id}')">
               Add to Cart
             </button>
           ` : '<span style="font-size: 0.75rem; color: var(--accent-red); display:block; margin-top:6px; font-weight:700;">Sold Out</span>'}
         </div>
-        <button class="drawer-item-remove" onclick="toggleWishlist(${prod.id})" title="Remove item">
+        <button class="drawer-item-remove" onclick="toggleWishlist('${prod._id || prod.id}')" title="Remove item">
           <svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>
         </button>
       </div>
@@ -2097,10 +2217,10 @@ function renderWishlist() {
 
 // Add item to cart
 function addToCart(productId, qty) {
-  const prod = PRODUCTS.find(p => p.id === productId);
+  const prod = getProductByIdLocal(productId);
   if (!prod) return;
 
-  const existing = cart.find(item => item.productId === productId);
+  const existing = cart.find(item => String(item.productId) === String(productId));
   if (existing) {
     existing.quantity += qty;
   } else {
@@ -2115,10 +2235,10 @@ function addToCart(productId, qty) {
 
 // Buy Now function - adds to cart and immediately triggers checkout
 function buyNow(productId, qty = 1) {
-  const prod = PRODUCTS.find(p => p.id === productId);
+  const prod = getProductByIdLocal(productId);
   if (!prod) return;
 
-  const existing = cart.find(item => item.productId === productId);
+  const existing = cart.find(item => String(item.productId) === String(productId));
   if (existing) {
     existing.quantity += qty;
   } else {
@@ -2135,7 +2255,7 @@ function buyNow(productId, qty = 1) {
 
 // Remove item from cart
 function removeFromCart(productId) {
-  cart = cart.filter(item => item.productId !== productId);
+  cart = cart.filter(item => String(item.productId) !== String(productId));
   localStorage.setItem("mt_cart", JSON.stringify(cart));
   updateBadges();
   renderCart();
@@ -2149,7 +2269,7 @@ function updateCartQuantity(productId, qty) {
     return;
   }
 
-  const existing = cart.find(item => item.productId === productId);
+  const existing = cart.find(item => String(item.productId) === String(productId));
   if (existing) {
     existing.quantity = qty;
   }
@@ -2163,7 +2283,7 @@ function updateCartQuantity(productId, qty) {
 function toggleWishlist(productId) {
   const indexStr = wishlist.indexOf(String(productId));
   const indexNum = wishlist.indexOf(Number(productId));
-  const prod = PRODUCTS.find(p => p.id === productId);
+  const prod = getProductByIdLocal(productId);
 
   if (indexStr > -1) {
     wishlist.splice(indexStr, 1);
@@ -2198,42 +2318,354 @@ function updateBadges() {
   elements.wishlistBadge.style.display = wishlist.length > 0 ? "flex" : "none";
 }
 
+// Render star SVGs based on rating
+function renderStars(rating) {
+  const rounded = Math.round(rating || 5);
+  let starsHtml = "";
+  for (let i = 1; i <= 5; i++) {
+    if (i <= rounded) {
+      starsHtml += `<svg style="width:16px;height:16px;fill:#FFA726" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>`;
+    } else {
+      starsHtml += `<svg style="width:16px;height:16px;fill:#E0E0E0" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>`;
+    }
+  }
+  return starsHtml;
+}
+
+// Render star percentage breakdown
+function renderRatingBreakdown(reviews) {
+  const list = reviews || [];
+  const total = list.length;
+  const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  list.forEach(r => {
+    const rVal = Math.round(r.rating) || 5;
+    if (counts[rVal] !== undefined) {
+      counts[rVal]++;
+    }
+  });
+
+  let breakdownHtml = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+  for (let star = 5; star >= 1; star--) {
+    const count = counts[star];
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    breakdownHtml += `
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem;">
+        <span style="width: 15px; font-weight: 600; color: var(--dark-brown);">${star}</span>
+        <svg style="width:12px;height:12px;fill:#FFA726" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>
+        <div style="flex: 1; height: 8px; background-color: var(--cream); border-radius: 4px; overflow: hidden;">
+          <div style="width: ${pct}%; height: 100%; background-color: var(--light-orange); border-radius: 4px;"></div>
+        </div>
+        <span style="width: 35px; text-align: right; color: var(--light-brown); font-weight: 600;">${pct}%</span>
+      </div>
+    `;
+  }
+  breakdownHtml += '</div>';
+  return breakdownHtml;
+}
+
+// Render list of individual reviews
+function renderReviewList(reviews) {
+  const list = reviews || [];
+  if (list.length === 0) {
+    return `
+      <div style="text-align: center; padding: 30px 10px; color: var(--light-brown);">
+        <p style="font-size: 1rem; font-weight: 600; margin-bottom: 4px;">No reviews yet</p>
+        <p style="font-size: 0.85rem;">Be the first to buy and review this product!</p>
+      </div>
+    `;
+  }
+
+  return list.map(r => {
+    const dateStr = new Date(r.createdAt || Date.now()).toLocaleDateString('en-IN', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
+
+    const colors = ['#FFD180', '#FF8A80', '#EA80FC', '#8C9EFF', '#80D8FF', '#A7FFEB', '#CCFF90'];
+    const charCodeSum = (r.name || 'A').charCodeAt(0) + (r.name || 'A').charCodeAt((r.name || 'A').length - 1);
+    const avatarBg = colors[charCodeSum % colors.length];
+    const initials = (r.name || 'A').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
+    return `
+      <div class="review-item" style="border-bottom: 1px solid var(--cream); padding-bottom: 16px; margin-bottom: 16px; animation: fadeIn 0.4s ease;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background-color: ${avatarBg}; color: var(--dark-brown); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; box-shadow: var(--shadow-sm);">
+              ${initials}
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-weight: 700; color: var(--dark-brown); font-size: 0.95rem;">${r.name}</span>
+                <span style="background-color: #E8F5E9; color: #2E7D32; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 12px; display: inline-flex; align-items: center; gap: 2px;">
+                  <svg style="width: 10px; height: 10px; fill: #2E7D32;" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  Verified Buyer
+                </span>
+              </div>
+              <span style="font-size: 0.75rem; color: var(--light-brown);">${dateStr}</span>
+            </div>
+          </div>
+          <div>
+            ${renderStars(r.rating)}
+          </div>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--dark-brown); line-height: 1.5; margin-left: 48px; margin-top: -4px;">${r.comment}</p>
+      </div>
+    `;
+  }).join('');
+}
+
 // Open Quick View Modal with populated contents in Rupees
-function openQuickView(productId) {
-  const prod = PRODUCTS.find(p => p.id === productId);
+async function openQuickView(productId) {
+  const prod = getProductByIdLocal(productId);
   if (!prod) return;
 
-  elements.modalBodyContent.innerHTML = `
-    <div class="modal-img-col">
-      <img src="${prod.image}" alt="${prod.name}">
-    </div>
-    <div class="modal-info-col">
-      <span class="modal-category">${prod.category} ${prod.ageGroup && prod.ageGroup !== 'All' ? `• Age: ${prod.ageGroup} Yrs` : ''}</span>
-      <h2 class="modal-title">${prod.name}</h2>
-      <div class="modal-rating">
-        <svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>
-        <span style="font-weight: bold; margin-left: 4px;">${prod.rating.toFixed(1)}</span>
-        <span style="color: var(--light-brown); font-size: 0.85rem; margin-left: 8px;">(45 customer reviews)</span>
+  // Check if user is logged in and check purchase status
+  const currentUser = getStoredUser();
+  let hasPurchased = false;
+
+  if (currentUser) {
+    try {
+      const ordersRes = await apiGetMyOrders();
+      const userOrders = ordersRes.data || [];
+      hasPurchased = userOrders.some(order => 
+        order.status !== 'cancelled' &&
+        order.items.some(item => String(item.productId) === String(prod._id || prod.id))
+      );
+    } catch (err) {
+      console.error("Error checking purchase status:", err);
+    }
+  }
+
+  // Get similar products from the same category or category group
+  let similarProds = PRODUCTS.filter(p => 
+    (p._id || p.id) !== prod.id && (p._id || p.id) !== prod._id &&
+    p.category === prod.category
+  );
+  
+  if (similarProds.length === 0) {
+    const mainCat = (prod.category || "").split('>')[0].trim();
+    similarProds = PRODUCTS.filter(p => 
+      (p._id || p.id) !== prod.id && (p._id || p.id) !== prod._id &&
+      (p.category || "").split('>')[0].trim() === mainCat
+    );
+  }
+  similarProds = similarProds.slice(0, 6);
+
+  // Get all unique product images (primary first, then additional)
+  const allImages = [prod.image, ...(prod.images || [])]
+    .map(url => url ? url.trim() : "")
+    .filter((val, index, self) => val !== "" && self.indexOf(val) === index);
+
+  // 1. Pre-render Carousel navigation buttons
+  let navButtonsHtml = "";
+  if (allImages.length > 1) {
+    navButtonsHtml = `
+      <button id="carouselPrevBtn" class="carousel-nav-btn" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.92); border: none; box-shadow: var(--shadow-md); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.2s;">
+        <svg style="width: 22px; height: 22px; fill: var(--dark-brown);" viewBox="0 0 24 24"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/></svg>
+      </button>
+      <button id="carouselNextBtn" class="carousel-nav-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.92); border: none; box-shadow: var(--shadow-md); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.2s;">
+        <svg style="width: 22px; height: 22px; fill: var(--dark-brown);" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>
+      </button>
+    `;
+  }
+
+  // 2. Pre-render Carousel thumbnails
+  let thumbnailsHtml = "";
+  if (allImages.length > 1) {
+    const thumbsListHtml = allImages.map((img, idx) => `
+      <img class="carousel-thumb-img ${idx === 0 ? 'active' : ''}" src="${img}" data-index="${idx}" style="width: 54px; height: 54px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid ${idx === 0 ? 'var(--light-orange)' : 'transparent'}; background-color: var(--cream); transition: all 0.2s; box-shadow: var(--shadow-xs);">
+    `).join('');
+
+    thumbnailsHtml = `
+      <div class="carousel-thumbnails-row" style="display: flex; gap: 8px; justify-content: center; width: 100%; overflow-x: auto; padding: 6px 0; scrollbar-width: thin;">
+        ${thumbsListHtml}
       </div>
-      <div class="modal-price-row">
-        <span class="modal-price">₹${prod.price.toLocaleString('en-IN')}</span>
-        ${prod.originalPrice ? `<span class="product-original-price" style="font-size: 1.1rem;">₹${prod.originalPrice.toLocaleString('en-IN')}</span>` : ''}
-      </div>
-      <p class="modal-desc">${prod.description}</p>
-      
-      <div class="modal-actions" style="display: flex; gap: 10px; align-items: stretch; margin-top: 15px;">
-        ${prod.inStock ? `
-          <div class="modal-qty">
-            <button id="modalQtyDec">-</button>
-            <input type="text" id="modalQtyVal" value="1" readonly>
-            <button id="modalQtyInc">+</button>
+    `;
+  }
+
+  // 3. Pre-render Similar products list
+  let similarProductsHtml = "";
+  if (similarProds.length > 0) {
+    const cardsListHtml = similarProds.map(p => `
+      <div class="similar-product-card" onclick="openQuickView('${p._id || p.id}')" style="flex: 0 0 160px; background-color: var(--cream); border-radius: var(--border-radius-md); padding: 12px; cursor: pointer; text-align: center; border: 1px solid rgba(93,64,55,0.05); display: flex; flex-direction: column; justify-content: space-between; height: 230px;">
+        <div style="width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background-color: white; border-radius: 6px; overflow: hidden; margin-bottom: 8px;">
+          <img src="${p.image}" alt="${p.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--dark-brown); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0;">${p.name}</h4>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="font-weight: 700; font-size: 0.85rem; color: var(--dark-brown);">₹${p.price.toLocaleString('en-IN')}</span>
+            ${p.originalPrice ? `<span style="font-size: 0.75rem; color: var(--light-brown); text-decoration: line-through;">₹${p.originalPrice.toLocaleString('en-IN')}</span>` : ''}
           </div>
-          <button class="btn" id="modalAddToCartBtn" style="flex: 1; background: var(--soft-yellow); color: var(--dark-brown); font-weight: 700; border-radius: 30px; border: 2px solid var(--light-orange); transition: transform 0.2s;">Add to Cart</button>
-          <button class="btn" id="modalBuyNowBtn" style="flex: 1; background: linear-gradient(to right, var(--deep-orange), var(--light-orange)); color: white; font-weight: 700; border-radius: 30px; border: none; box-shadow: var(--shadow-md); transition: transform 0.2s;">Buy Now</button>
-        ` : `<span style="font-weight: 700; color: var(--accent-red); font-size: 1.1rem; padding: 6px 0;">Product Currently Sold Out</span>`}
+          <div style="display: flex; align-items: center; font-size: 0.75rem; color: var(--light-orange); font-weight: bold; gap: 2px;">
+            ★ ${(p.rating || 5.0).toFixed(1)}
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    similarProductsHtml = `
+      <div class="similar-products-section" style="padding: 30px; border-top: 2px solid var(--cream); background-color: var(--white);">
+        <h3 style="font-family: var(--font-header); font-size: 1.2rem; margin-bottom: 16px; color: var(--dark-brown); display: flex; align-items: center; gap: 8px;">
+          <svg style="width: 22px; height: 22px; fill: var(--light-orange);" viewBox="0 0 24 24"><path d="M12,18H6V14H12M21,14V12L20,7H4L3,12V14H4V20H14V14H18V20H20V14M20,4H4V6H20V4Z"/></svg>
+          Similar Products You May Like
+        </h3>
+        <div class="similar-products-scroll" style="display: flex; gap: 16px; overflow-x: auto; padding: 8px 0; scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
+          ${cardsListHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  // 4. Pre-render Reviews right column HTML to completely de-nest template strings
+  let reviewsRightColHtml = "";
+  if (hasPurchased) {
+    reviewsRightColHtml = `
+      <div class="write-review-card" style="background-color: var(--white); border: 2px solid var(--cream); border-radius: var(--border-radius-lg); padding: 20px; box-shadow: var(--shadow-sm);">
+        <h4 style="font-family: var(--font-header); font-size: 1.05rem; margin-bottom: 10px; color: var(--dark-brown);">Share Your Experience</h4>
+        <form id="productReviewForm" style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <label style="font-weight: 700; font-size: 0.8rem; display: block; margin-bottom: 4px; color: var(--dark-brown);">Your Rating</label>
+            <div class="star-rating-selector" style="display: flex; gap: 6px; font-size: 1.6rem; cursor: pointer; color: #E0E0E0; line-height: 1;">
+              <span class="selector-star" data-rating="1">★</span>
+              <span class="selector-star" data-rating="2">★</span>
+              <span class="selector-star" data-rating="3">★</span>
+              <span class="selector-star" data-rating="4">★</span>
+              <span class="selector-star" data-rating="5">★</span>
+            </div>
+            <input type="hidden" id="reviewRatingInput" value="" required>
+          </div>
+          <div>
+            <label for="reviewCommentInput" style="font-weight: 700; font-size: 0.8rem; display: block; margin-bottom: 4px; color: var(--dark-brown);">Your Review</label>
+            <textarea id="reviewCommentInput" rows="2" required placeholder="Tell others about quality, size, and fit..." style="border: 2px solid var(--cream); padding: 8px 12px; border-radius: var(--border-radius-md); font-family: var(--font-body); width: 100%; outline: none; resize: none; font-size: 0.9rem;"></textarea>
+          </div>
+          <button type="submit" class="btn" style="background: var(--deep-orange); color: white; font-weight: 700; border-radius: 30px; border: none; padding: 8px 18px; transition: transform 0.2s; align-self: flex-start; cursor: pointer; font-size: 0.9rem;">Submit Review</button>
+        </form>
+      </div>
+    `;
+  } else {
+    const loginTextHtml = currentUser 
+      ? "Only customers who purchased this product can leave a review." 
+      : `Please <span style="text-decoration: underline; cursor: pointer; color: var(--deep-orange); font-weight: 700;" onclick="closeModal(); openModal(elements.userAuthModal);">login</span> to write a review.`;
+
+    reviewsRightColHtml = `
+      <div style="background-color: var(--cream); border-radius: var(--border-radius-md); padding: 15px; text-align: center; border: 1px dashed var(--light-brown); color: var(--light-brown);">
+        <p style="font-size: 0.85rem; margin-bottom: 0; font-weight: 600;">
+          ${loginTextHtml}
+        </p>
+      </div>
+    `;
+  }
+
+  elements.modalBodyContent.innerHTML = `
+    <div class="quickview-main-details">
+      <!-- Carousel Column -->
+      <div class="modal-img-col" style="padding: 30px; display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: flex-start;">
+        <div class="carousel-main-wrapper" style="position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background-color: var(--cream); border-radius: var(--border-radius-lg); overflow: hidden; border: 1px solid rgba(93,64,55,0.06); box-shadow: var(--shadow-sm);">
+          <img id="carouselMainImg" src="${allImages[0] || prod.image}" alt="${prod.name}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.2s ease;">
+          ${navButtonsHtml}
+        </div>
+        ${thumbnailsHtml}
+      </div>
+
+      <!-- Info Column -->
+      <div class="modal-info-col" style="padding: 30px;">
+        <span class="modal-category">${prod.category} ${prod.ageGroup && prod.ageGroup !== 'All' ? `• Age: ${prod.ageGroup} Yrs` : ''}</span>
+        <h2 class="modal-title" style="margin-bottom: 8px;">${prod.name}</h2>
+        <div class="modal-rating" style="margin-bottom: 12px;">
+          ${renderStars(prod.rating || 5.0)}
+          <span style="font-weight: bold; margin-left: 4px; color: var(--dark-brown);">${(prod.rating || 5.0).toFixed(1)}</span>
+          <span style="color: var(--light-brown); font-size: 0.85rem; margin-left: 8px;">(${prod.reviews ? prod.reviews.length : 0} reviews)</span>
+        </div>
+        <div class="modal-price-row" style="margin-bottom: 12px;">
+          <span class="modal-price" style="font-size: 1.5rem; color: var(--dark-brown);">₹${prod.price.toLocaleString('en-IN')}</span>
+          ${prod.originalPrice ? `<span class="product-original-price" style="font-size: 1.1rem;">₹${prod.originalPrice.toLocaleString('en-IN')}</span>` : ''}
+        </div>
+        <p class="modal-desc" style="margin-bottom: 16px; font-size: 0.9rem;">${prod.description}</p>
+        
+        <div class="modal-actions" style="display: flex; gap: 10px; align-items: stretch; margin-top: 10px;">
+          ${prod.inStock ? `
+            <div class="modal-qty">
+              <button id="modalQtyDec">-</button>
+              <input type="text" id="modalQtyVal" value="1" readonly>
+              <button id="modalQtyInc">+</button>
+            </div>
+            <button class="btn" id="modalAddToCartBtn" style="flex: 1; background: var(--soft-yellow); color: var(--dark-brown); font-weight: 700; border-radius: 30px; border: 2px solid var(--light-orange); transition: transform 0.2s;">Add to Cart</button>
+            <button class="btn" id="modalBuyNowBtn" style="flex: 1; background: linear-gradient(to right, var(--deep-orange), var(--light-orange)); color: white; font-weight: 700; border-radius: 30px; border: none; box-shadow: var(--shadow-md); transition: transform 0.2s;">Buy Now</button>
+          ` : `<span style="font-weight: 700; color: var(--accent-red); font-size: 1.1rem; padding: 6px 0;">Product Currently Sold Out</span>`}
+        </div>
+      </div>
+    </div>
+
+    <!-- Similar Products Section -->
+    ${similarProductsHtml}
+
+    <!-- Reviews Grid Section -->
+    <div class="reviews-section-container">
+      <div class="reviews-left-col">
+        <h3 style="font-family: var(--font-header); font-size: 1.25rem; margin-bottom: 16px; color: var(--dark-brown);">Customer Reviews</h3>
+        
+        <div class="rating-overview-box" style="background-color: var(--cream); border-radius: var(--border-radius-md); padding: 20px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(93,64,55,0.05);">
+          <div style="font-size: 3rem; font-weight: 800; color: var(--dark-brown); line-height: 1;">${(prod.rating || 5.0).toFixed(1)}</div>
+          <div style="margin: 8px 0;">${renderStars(prod.rating || 5.0)}</div>
+          <div style="font-size: 0.85rem; color: var(--light-brown); font-weight: 600;">Based on ${prod.reviews ? prod.reviews.length : 0} Reviews</div>
+        </div>
+
+        ${renderRatingBreakdown(prod.reviews)}
+      </div>
+
+      <div class="reviews-right-col" style="display: flex; flex-direction: column; gap: 20px;">
+        ${reviewsRightColHtml}
+
+        <div class="reviews-list-container" style="max-height: 250px; overflow-y: auto; padding-right: 8px;">
+          ${renderReviewList(prod.reviews)}
+        </div>
       </div>
     </div>
   `;
+
+  // Hook up Image Carousel event listeners
+  if (allImages.length > 1) {
+    const mainImg = document.getElementById("carouselMainImg");
+    const prevBtn = document.getElementById("carouselPrevBtn");
+    const nextBtn = document.getElementById("carouselNextBtn");
+    const thumbs = document.querySelectorAll(".carousel-thumb-img");
+    
+    let currentIndex = 0;
+    
+    const updateCarousel = (index) => {
+      currentIndex = (index + allImages.length) % allImages.length;
+      
+      // Fade transition effect
+      if (mainImg) {
+        mainImg.style.opacity = 0.2;
+        setTimeout(() => {
+          mainImg.src = allImages[currentIndex];
+          mainImg.style.opacity = 1;
+        }, 120);
+      }
+      
+      // Toggle active states on thumbs
+      thumbs.forEach((t, idx) => {
+        if (idx === currentIndex) {
+          t.style.borderColor = "var(--light-orange)";
+          t.classList.add("active");
+        } else {
+          t.style.borderColor = "transparent";
+          t.classList.remove("active");
+        }
+      });
+    };
+    
+    if (prevBtn) prevBtn.addEventListener("click", () => updateCarousel(currentIndex - 1));
+    if (nextBtn) nextBtn.addEventListener("click", () => updateCarousel(currentIndex + 1));
+    
+    thumbs.forEach(thumb => {
+      thumb.addEventListener("click", () => {
+        const idx = parseInt(thumb.getAttribute("data-index"));
+        updateCarousel(idx);
+      });
+    });
+  }
 
   if (prod.inStock) {
     const qtyVal = document.getElementById("modalQtyVal");
@@ -2247,17 +2679,85 @@ function openQuickView(productId) {
     });
     document.getElementById("modalAddToCartBtn").addEventListener("click", () => {
       const quantity = parseInt(qtyVal.value);
-      addToCart(prod.id, quantity);
+      addToCart(prod._id || prod.id, quantity);
       closeModal();
     });
     const modalBuyNowBtn = document.getElementById("modalBuyNowBtn");
     if (modalBuyNowBtn) {
       modalBuyNowBtn.addEventListener("click", () => {
         const quantity = parseInt(qtyVal.value);
-        buyNow(prod.id, quantity);
-        // Do not call closeModal() here because buyNow() already handles opening the checkout/login modal
+        buyNow(prod._id || prod.id, quantity);
       });
     }
+  }
+
+  // Hook up Star Selector Events if form is rendered
+  const stars = document.querySelectorAll(".selector-star");
+  const ratingInput = document.getElementById("reviewRatingInput");
+  
+  if (stars.length > 0 && ratingInput) {
+    let currentRating = 0;
+    
+    stars.forEach(star => {
+      star.addEventListener("mouseover", () => {
+        const rVal = parseInt(star.getAttribute("data-rating"));
+        highlightStars(rVal);
+      });
+      
+      star.addEventListener("mouseout", () => {
+        highlightStars(currentRating);
+      });
+      
+      star.addEventListener("click", () => {
+        currentRating = parseInt(star.getAttribute("data-rating"));
+        ratingInput.value = currentRating;
+        highlightStars(currentRating);
+      });
+    });
+    
+    function highlightStars(rating) {
+      stars.forEach(s => {
+        const val = parseInt(s.getAttribute("data-rating"));
+        if (val <= rating) {
+          s.style.color = "#FFA726";
+        } else {
+          s.style.color = "#E0E0E0";
+        }
+      });
+    }
+  }
+
+  // Hook up Review Form Submit
+  const reviewForm = document.getElementById("productReviewForm");
+  if (reviewForm) {
+    reviewForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const rating = parseInt(ratingInput.value);
+      const comment = document.getElementById("reviewCommentInput").value.trim();
+      
+      if (!rating) {
+        showToast("Please select a rating star", "error");
+        return;
+      }
+      
+      try {
+        const submitBtn = reviewForm.querySelector("button[type='submit']");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+        
+        await apiCreateProductReview(prod._id || prod.id, rating, comment);
+        showToast("Review submitted successfully!", "success");
+        
+        // Reload products and refresh modal
+        await loadProducts();
+        openQuickView(prod._id || prod.id);
+      } catch (err) {
+        showToast(err.message || "Failed to submit review", "error");
+        const submitBtn = reviewForm.querySelector("button[type='submit']");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Review";
+      }
+    });
   }
 
   elements.drawerOverlay.classList.add("active");
@@ -2328,10 +2828,10 @@ function renderAdminProductsTable() {
           </span>
         </td>
         <td style="padding: 8px 12px; text-align: center; white-space: nowrap;">
-          <button class="admin-action-btn admin-btn-edit" onclick="editProduct(${prod.id})" title="Edit Product">
+          <button class="admin-action-btn admin-btn-edit" onclick="editProduct('${prod._id || prod.id}')" title="Edit Product">
             <svg viewBox="0 0 24 24"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z"/></svg>
           </button>
-          <button class="admin-action-btn admin-btn-delete" onclick="deleteProduct(${prod.id})" title="Delete Product">
+          <button class="admin-action-btn admin-btn-delete" onclick="deleteProduct('${prod._id || prod.id}')" title="Delete Product">
             <svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>
           </button>
         </td>
@@ -2342,21 +2842,30 @@ function renderAdminProductsTable() {
 
 // Edit existing product
 function editProduct(id) {
-  const prod = PRODUCTS.find(p => p.id === id);
+  const prod = PRODUCTS.find(p => (p._id || p.id) === id);
   if (!prod) return;
 
   elements.productFormPanel.style.display = "block";
   elements.addNewProductBtn.style.display = "none";
   elements.formPanelTitle.textContent = "Edit Product Details";
 
-  elements.editProductId.value = prod.id;
+  elements.editProductId.value = prod._id || prod.id;
   elements.prodName.value = prod.name;
-  elements.prodCategory.value = prod.category;
+  
+  // Set category dropdown value
+  let catVal = "";
+  if (prod.categoryId) {
+    catVal = prod.categoryId + "|" + (prod.subcategoryId || "");
+  }
+  elements.prodCategory.value = catVal;
+  
   elements.prodPrice.value = Math.round(prod.price);
   elements.prodOriginalPrice.value = prod.originalPrice ? Math.round(prod.originalPrice) : "";
-  elements.prodImage.value = prod.image;
+  elements.prodImage.value = prod.image || "";
+  elements.prodImages.value = (prod.images || []).join("\n");
   elements.prodStock.value = prod.inStock ? "true" : "false";
-  elements.prodDesc.value = prod.description;
+  elements.prodAgeGroup.value = prod.ageGroup || "All";
+  elements.prodDesc.value = prod.description || "";
   elements.prodIsNew.checked = !!prod.isNew;
   elements.prodIsSale.checked = !!prod.isSale;
 
@@ -2364,18 +2873,21 @@ function editProduct(id) {
 }
 
 // Delete product
-function deleteProduct(id) {
-  const prod = PRODUCTS.find(p => p.id === id);
+async function deleteProduct(id) {
+  const prod = PRODUCTS.find(p => (p._id || p.id) === id);
   if (!prod) return;
 
   if (confirm(`Are you sure you want to remove "${prod.name}" from the store catalog?`)) {
-    PRODUCTS = PRODUCTS.filter(p => p.id !== id);
-    saveProductsToStorage();
-    showToast("Product deleted successfully.", "error");
-    
-    renderProducts();
-    renderAdminProductsTable();
-    renderCategoryGroups();
+    try {
+      await apiDeleteProduct(prod._id || prod.id);
+      showToast("Product deleted successfully.", "success");
+      await loadProducts();
+      renderProducts();
+      renderAdminProductsTable();
+      renderCategoryGroups();
+    } catch (err) {
+      showToast(err.message || "Failed to delete product", "error");
+    }
   }
 }
 
@@ -2436,6 +2948,9 @@ export function showToast(message, type = "success") {
     }, 300);
   }, 3000);
 }
+
+// Bridge for notifications.js (avoids circular import)
+window.addEventListener('show-toast', (e) => showToast(e.detail.message, e.detail.type));
 
 // Global category click API (called from footer)
 window.app = {
@@ -2575,7 +3090,11 @@ function getIllustrationSvg(type, imageUrl) {
     `;
   } else {
     // Custom URL image
-    return `<img src="${imageUrl || 'assets/hero_banner_custom.png'}" alt="Slideshow Image" class="hero-custom-img">`;
+    return `
+      <div style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
+        <img src="${imageUrl || 'assets/hero_banner_custom.png'}" alt="Slideshow Image" class="hero-banner-img" style="width: 100%; max-width: 420px; border-radius: var(--border-radius-xl); box-shadow: var(--shadow-lg); border: 8px solid var(--white); transform: rotate(1deg); transition: var(--transition-bounce);">
+      </div>
+    `;
   }
 }
 
@@ -2628,23 +3147,33 @@ function renderHeroSlideshow() {
 
     const illustrationHtml = getIllustrationSvg(slide.illustration, slide.imageUrl);
 
-    slidesHtml += `
-      <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background: ${gradient};">
-        <div class="hero-slide-grid container">
-          <div class="hero-slide-content">
-            <span class="slide-badge" style="${badgeStyle}">${slide.badgeText}</span>
-            <h1 class="slide-title">${slide.title}</h1>
-            <p class="slide-subtitle">${slide.subtitle}</p>
-            <div class="slide-ctas">
-              <a href="#products" onclick="app.filterCategory('${slide.ctaCategory}')" class="btn btn-primary" style="${btnStyle}">${slide.ctaText}</a>
+    if (slide.illustration === "custom-full") {
+      slidesHtml += `
+        <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background: none; padding: 0;">
+          <a href="#products" onclick="app.filterCategory('${slide.ctaCategory || ''}')" style="display: block; width: 100%; height: 100%;">
+            <img src="${slide.imageUrl || 'assets/main_banner.jpg'}" alt="${slide.title || 'Slide'}" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: var(--border-radius-xl);">
+          </a>
+        </div>
+      `;
+    } else {
+      slidesHtml += `
+        <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background: ${gradient};">
+          <div class="hero-slide-grid container">
+            <div class="hero-slide-content">
+              <span class="slide-badge" style="${badgeStyle}">${slide.badgeText}</span>
+              <h1 class="slide-title">${slide.title}</h1>
+              <p class="slide-subtitle">${slide.subtitle}</p>
+              <div class="slide-ctas">
+                <a href="#products" onclick="app.filterCategory('${slide.ctaCategory}')" class="btn btn-primary" style="${btnStyle}">${slide.ctaText}</a>
+              </div>
+            </div>
+            <div class="hero-slide-image animated-hero-illustration">
+              ${illustrationHtml}
             </div>
           </div>
-          <div class="hero-slide-image animated-hero-illustration">
-            ${illustrationHtml}
-          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
 
     dotsHtml += `
       <span class="dot ${idx === 0 ? 'active' : ''}" data-slide="${idx}"></span>
@@ -2966,7 +3495,7 @@ async function renderAdminCategoriesTable() {
     adminCategories.forEach(cat => {
       // Category Header Card
       html += `
-        <div class="admin-category-card" data-id="${cat._id}" style="background: white; border-radius: var(--border-radius-md); border: 2px solid ${cat.isActive ? 'var(--soft-yellow)' : '#ddd'}; box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 10px;">
+        <div class="admin-category-card" draggable="true" data-id="${cat._id}" style="cursor: grab; background: white; border-radius: var(--border-radius-md); border: 2px solid ${cat.isActive ? 'var(--soft-yellow)' : '#ddd'}; box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 10px;">
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background-color: ${cat.isActive ? '#fffdf7' : '#f5f5f5'}; border-bottom: 1px solid rgba(0,0,0,0.05);">
             <div style="display: flex; align-items: center; gap: 12px;">
               <div style="width: 40px; height: 40px; border-radius: 8px; background-color: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
@@ -2991,7 +3520,7 @@ async function renderAdminCategoriesTable() {
               `<table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
                 <tbody>
                   ${cat.subcategories.map(sub => `
-                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <tr class="admin-subcategory-row" draggable="true" data-id="${sub._id}" data-catid="${cat._id}" style="border-bottom: 1px solid #f0f0f0; cursor: grab;">
                       <td style="padding: 8px; width: 40px; color: #ccc;">↳</td>
                       <td style="padding: 8px; font-weight: 600; color: ${sub.isActive ? 'var(--dark-brown)' : '#aaa'};">${sub.name}</td>
                       <td style="padding: 8px; font-size: 0.8rem; color: var(--light-brown);">Order: ${sub.order}</td>
@@ -3066,10 +3595,107 @@ async function renderAdminCategoriesTable() {
       });
     });
     
+    // Setup Drag and Drop for Categories
+    setupCategoryDragAndDrop();
+    // Setup Drag and Drop for Subcategories
+    setupSubcategoryDragAndDrop();
+    
   } catch (error) {
     console.error("Error fetching categories:", error);
     elements.adminCategoriesList.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--accent-red);">Failed to load categories.</div>`;
   }
+}
+
+// Drag & Drop for category cards
+function setupCategoryDragAndDrop() {
+  let draggedCard = null;
+  const cards = document.querySelectorAll('.admin-category-card');
+  cards.forEach(card => {
+    card.addEventListener('dragstart', function(e) {
+      draggedCard = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', this.getAttribute('data-id'));
+      setTimeout(() => this.style.opacity = '0.4', 0);
+    });
+    card.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.borderTop = '3px solid var(--primary)';
+    });
+    card.addEventListener('dragleave', function() {
+      this.style.borderTop = '';
+    });
+    card.addEventListener('drop', async function(e) {
+      e.stopPropagation();
+      this.style.borderTop = '';
+      if (draggedCard && draggedCard !== this) {
+        const parent = this.parentNode;
+        const allCards = Array.from(parent.querySelectorAll('.admin-category-card'));
+        const di = allCards.indexOf(draggedCard);
+        const ti = allCards.indexOf(this);
+        if (di < ti) parent.insertBefore(draggedCard, this.nextSibling);
+        else parent.insertBefore(draggedCard, this);
+        const ids = Array.from(parent.querySelectorAll('.admin-category-card')).map(c => c.getAttribute('data-id'));
+        try {
+          await apiReorderCategories(ids);
+          showToast('Categories reordered', 'success');
+        } catch(err) {
+          showToast('Failed to reorder', 'error');
+          renderAdminCategoriesTable();
+        }
+      }
+    });
+    card.addEventListener('dragend', function() {
+      this.style.opacity = '1';
+      cards.forEach(c => c.style.borderTop = '');
+    });
+  });
+}
+
+// Drag & Drop for subcategory rows
+function setupSubcategoryDragAndDrop() {
+  let draggedRow = null;
+  const rows = document.querySelectorAll('.admin-subcategory-row');
+  rows.forEach(row => {
+    row.addEventListener('dragstart', function(e) {
+      draggedRow = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', this.getAttribute('data-id'));
+      setTimeout(() => this.style.opacity = '0.4', 0);
+    });
+    row.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (draggedRow && draggedRow.getAttribute('data-catid') === this.getAttribute('data-catid')) {
+        this.style.borderTop = '2px solid var(--primary)';
+      }
+    });
+    row.addEventListener('dragleave', function() {
+      this.style.borderTop = '';
+    });
+    row.addEventListener('drop', async function(e) {
+      e.stopPropagation();
+      this.style.borderTop = '';
+      if (draggedRow && draggedRow !== this && draggedRow.getAttribute('data-catid') === this.getAttribute('data-catid')) {
+        const tbody = this.parentNode;
+        const allRows = Array.from(tbody.querySelectorAll('.admin-subcategory-row'));
+        const di = allRows.indexOf(draggedRow);
+        const ti = allRows.indexOf(this);
+        if (di < ti) tbody.insertBefore(draggedRow, this.nextSibling);
+        else tbody.insertBefore(draggedRow, this);
+        const ids = Array.from(tbody.querySelectorAll('.admin-subcategory-row')).map(r => r.getAttribute('data-id'));
+        try {
+          await apiReorderSubcategories(ids);
+          showToast('Subcategories reordered', 'success');
+        } catch(err) {
+          showToast('Failed to reorder', 'error');
+          renderAdminCategoriesTable();
+        }
+      }
+    });
+    row.addEventListener('dragend', function() {
+      this.style.opacity = '1';
+      rows.forEach(r => r.style.borderTop = '');
+    });
+  });
 }
 
 // Category Form Handling
@@ -3254,5 +3880,3 @@ openOwnerDashboard = function() {
   renderAdminCategoriesTable();
   populateCategoryDropdowns();
 };
-
-init();

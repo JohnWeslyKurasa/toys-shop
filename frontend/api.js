@@ -213,6 +213,18 @@ export async function apiDeleteProduct(productId) {
   return handleResponse(res);
 }
 
+/**
+ * Submit a product review (registered/purchased customers)
+ */
+export async function apiCreateProductReview(productId, rating, comment) {
+  const res = await fetch(`${BASE_URL}/products/${productId}/reviews`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ rating, comment }),
+  });
+  return handleResponse(res);
+}
+
 // ── Categories ───────────────────────────────────────────────────────────────
 
 /**

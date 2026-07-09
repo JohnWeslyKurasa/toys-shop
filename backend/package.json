@@ -16,5 +16,8 @@
     "mongoose": "^9.7.2",
     "razorpay": "^2.9.4",
     "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "jimp": "^1.6.1"
   }
 }

@@ -1,4 +1,7 @@
-import { showToast } from './app.js';
+// Break circular dependency: dispatch a custom event instead of importing directly from app.js
+function showToast(message, type = 'success') {
+  window.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
+}
 
 let socket = null;
 let authToken = localStorage.getItem("mt_jwt") || null; // Fixed key
