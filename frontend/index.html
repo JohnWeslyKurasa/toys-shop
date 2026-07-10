@@ -520,23 +520,20 @@
           </svg>
         </a>
         <p>Premium care, lovely outfits, and developmental wooden play items for children, babies, and moms under one roof.</p>
-        <div class="social-links">
-          <a href="#" class="social-icon" title="Facebook">
-            <svg viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.95 14.22 5.95C15.31 5.95 16.45 6.15 16.45 6.15V8.62H15.19C13.93 8.62 13.54 9.4 13.54 10.2V12.06H16.32L15.88 14.96H13.54V21.96C18.34 21.21 22 17.06 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/></svg>
-          </a>
-          <a href="#" class="social-icon" title="Instagram">
-            <svg viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4A3.6,3.6 0 0,0 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6A3.6,3.6 0 0,0 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5Z"/></svg>
-          </a>
-          <a href="#" class="social-icon" title="Pinterest">
-            <svg viewBox="0 0 24 24"><path d="M12.2,2C6.6,2 2.1,6.5 2.1,12.2C2.1,16.7 4.9,20.5 9,21.9C8.9,21.1 8.8,19.8 9,18.9L10.3,13.2C10.3,13.2 9.9,12.4 9.9,11.2C9.9,9.4 10.9,8.1 12.2,8.1C13.3,8.1 13.9,8.9 13.9,9.9C13.9,11 13.2,12.7 12.9,14.2C12.6,15.5 13.6,16.5 14.8,16.5C17.1,16.5 18.9,14.1 18.9,10.7C18.9,7.7 16.7,5.6 13.6,5.6C10.1,5.6 7.9,8.2 7.9,11.4C7.9,12.5 8.3,13.6 8.9,14.3C9,14.4 9,14.5 9,14.6L8.6,16.2C8.5,16.5 8.3,16.6 8,16.5C5.9,15.5 4.6,12.5 4.6,10.2C4.6,6.7 7.2,3.5 12.5,3.5C16.8,3.5 20.1,6.5 20.1,10.8C20.1,15.1 17.4,18.5 13.7,18.5C12.5,18.5 11.3,17.9 10.9,17.1L10.1,20.2C9.8,21.3 9,22.7 8.5,23.5C9.7,23.8 10.9,24 12.2,24C17.8,24 22.3,19.5 22.3,13.8C22.2,8.2 17.8,2 12.2,2Z"/></svg>
-          </a>
-        </div>
       </div>
 
       <!-- Col 2: Categories -->
       <div class="footer-col">
         <h3>Categories</h3>
-      <!-- Col 2: Useful links -->
+        <ul>
+          <li><a href="#products" onclick="app.filterCategory('New Born')">New Born</a></li>
+          <li><a href="#products" onclick="app.filterCategory('Toys')">Toys</a></li>
+          <li><a href="#products" onclick="app.filterCategory('Mother Care / Maternity')">Mother Care</a></li>
+          <li><a href="#products" onclick="app.filterCategory('Grooming & Health')">Grooming</a></li>
+          <li><a href="#products" onclick="app.filterCategory('all')">All Products</a></li>
+        </ul>
+      </div>
+      <!-- Col 3: Useful links -->
       <div class="footer-col">
         <h3>Customer Support</h3>
         <ul>
@@ -559,15 +556,6 @@
         </ul>
       </div>
 
-      <!-- Col 4: Newsletter -->
-      <div class="footer-col">
-        <h3>Newsletter</h3>
-        <p style="font-size: 0.9rem; color: #D7CCC8; margin-bottom: 16px;">Subscribe to receive updates, safety tips, and exclusive coupons!</p>
-        <form class="newsletter-form" id="newsletterForm">
-          <input type="email" id="newsletterEmail" placeholder="Enter your email address" required>
-          <button type="submit">Subscribe</button>
-        </form>
-      </div>
     </div>
     
     <!-- Footer Bottom -->
@@ -647,7 +635,7 @@
         </div>
         <p id="userLoginRoleHint" style="font-size: 0.82rem; color: var(--light-brown); text-align: center; margin-top: -4px; margin-bottom: 12px;">Sign in as a parent to place orders and manage your wishlist.</p>
         
-        <form id="userLoginForm" onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 14px;">
+        <form id="userLoginForm" style="display: flex; flex-direction: column; gap: 14px;">
           <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column; gap: 6px;">
             <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Email Address</label>
             <input type="email" id="userLoginEmail" placeholder="e.g. mom@example.com" required style="border: 2px solid var(--cream); padding: 12px 16px; border-radius: var(--border-radius-md); font-family: var(--font-body); font-size: 0.95rem; width: 100%; outline: none; background-color: var(--cream);">
@@ -668,7 +656,7 @@
         <h3 style="font-family: var(--font-headings); font-size: 1.3rem; color: var(--dark-brown); text-align: center; margin-bottom: 4px;">Create Parent Account</h3>
         <p style="font-size: 0.85rem; color: var(--light-brown); text-align: center; margin-bottom: 12px;">Get started today. Save shipping options and shop hassle-free.</p>
         
-        <form id="userRegisterForm" onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 14px;">
+        <form id="userRegisterForm" style="display: flex; flex-direction: column; gap: 14px;">
           <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column; gap: 6px;">
             <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Full Name</label>
             <input type="text" id="userRegisterName" placeholder="e.g. Jane Doe" required style="border: 2px solid var(--cream); padding: 12px 16px; border-radius: var(--border-radius-md); font-family: var(--font-body); font-size: 0.95rem; width: 100%; outline: none; background-color: var(--cream);">
@@ -891,8 +879,12 @@
                 <input type="text" id="prodImage" required placeholder="e.g. assets/product_baby_dress.png" style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none;">
               </div>
               <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0; grid-column: 1 / -1;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Additional Image URLs (one URL per line)</label>
-                <textarea id="prodImages" rows="2" placeholder="Paste extra image links here (one link per line)..." style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none; resize: vertical;"></textarea>
+                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Additional Image URLs</label>
+                <div id="additionalImagesContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                  <!-- JS will inject inputs here -->
+                </div>
+                <button type="button" id="addAnotherImageBtn" style="align-self: flex-start; background: var(--cream); border: 2px solid var(--soft-yellow); color: var(--dark-brown); font-weight: 700; border-radius: 20px; padding: 6px 12px; cursor: pointer; font-size: 0.8rem; margin-top: 4px; transition: transform 0.2s;">+ Add Another Image</button>
+                <textarea id="prodImages" style="display: none;"></textarea>
               </div>
               <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0;">
                 <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Stock Status</label>
@@ -1063,82 +1055,6 @@
           </div>
         </div>
         
-        <!-- SECTION 2: SLIDESHOW MANAGEMENT -->
-        <div id="slidesDashboardSection" style="display: none; flex-direction: column; gap: 20px; width: 100%;">
-          <!-- Slide Form Panel (Hidden by default, shown when adding/editing) -->
-          <div class="dashboard-form-panel" id="slideFormPanel" style="display: none; background-color: var(--cream); padding: 24px; border-radius: var(--border-radius-lg); border: 2px solid var(--soft-yellow);">
-            <h3 id="slideFormPanelTitle" style="font-size: 1.25rem; margin-bottom: 16px;">Add New Slide Banner</h3>
-            <form id="slideManageForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
-              <input type="hidden" id="editSlideId">
-              
-              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Slide Heading / Title</label>
-                <input type="text" id="slideTitleInput" required placeholder="e.g. Toxin-Free Wooden Toys starting at ₹499" style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none;">
-              </div>
-              
-              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Badge Text</label>
-                <input type="text" id="slideBadgeTextInput" required placeholder="e.g. SPECIAL FESTIVAL OFFER" style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none;">
-              </div>
-
-              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Badge Theme Style</label>
-                <select id="slideBadgeStyleInput" required style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none; height: 44px;">
-                  <option value="yellow">Yellow (Festival Accent)</option>
-                  <option value="red">Red (Seasonal Sale)</option>
-                  <option value="blue">Cyan/Blue (New Arrival)</option>
-                </select>
-              </div>
-
-              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Background Gradient</label>
-                <select id="slideBgStyleInput" required style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none; height: 44px;">
-                  <option value="yellow">Warm Yellow/Cream Gradient</option>
-                  <option value="pink">Soft Pink/Red Gradient</option>
-                  <option value="blue">Cool Mint/Blue Gradient</option>
-                </select>
-              </div>
-
-              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Illustration Graphic</label>
-                <select id="slideIllustrationInput" required style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none; height: 44px;">
-                  <option value="baby-playing">Baby Clothing preset</option>
-                  <option value="mother-holding">Mother Cradling Baby preset</option>
-                  <option value="baby-crawling">Baby Feeding preset</option>
-                  <option value="custom">Custom Image Link (Side)</option>
-                  <option value="custom-full">Full-Width Banner Image</option>
-                </select>              </div>
-
-              <div class="form-group" id="slideImageUrlGroup" style="display: none; flex-direction: column; gap: 6px; margin-bottom: 0;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Custom Image URL / Path</label>
-                <input type="text" id="slideImageUrlInput" placeholder="e.g. assets/hero_banner_custom.png" style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none;">
-              </div>
-
-              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">CTA Button Text</label>
-                <input type="text" id="slideCtaTextInput" required placeholder="e.g. Shop Toys Now" style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none;">
-              </div>
-
-              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">CTA Category Target Link</label>
-                <select id="slideCtaCategoryInput" required style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none; height: 44px;">
-                  <!-- Filled dynamically in JS -->
-                </select>
-              </div>
-
-              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 0; grid-column: 1 / -1;">
-                <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">Slide Subtitle / Description</label>
-                <textarea id="slideSubtitleInput" rows="2" required placeholder="Describe the offer details..." style="border: 2px solid var(--white); padding: 10px 14px; border-radius: var(--border-radius-md); font-family: var(--font-body); background-color: var(--white); width: 100%; outline: none; resize: vertical;"></textarea>
-              </div>
-
-              <div style="grid-column: 1 / -1; display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px;">
-                <button type="button" class="btn btn-secondary" id="cancelSlideFormBtn" style="padding: 10px 24px; border-radius: 30px;">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="saveSlideBtn" style="padding: 10px 24px; border-radius: 30px;">Save Banner</button>
-              </div>
-            </form>
-          </div>
-        </div>
-
         <!-- SECTION 3: ORDERS MANAGEMENT -->
         <div id="ordersDashboardSection" style="display: none; flex-direction: column; gap: 20px; width: 100%;">
           <!-- Orders Table Wrapper -->

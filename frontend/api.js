@@ -4,7 +4,7 @@
  * JWT is stored in localStorage under "mt_jwt" and "mt_user"
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || "https://toys-shop-1.onrender.com/api"; // Uses production backend URL
+const BASE_URL = import.meta.env.VITE_API_URL || "https://toys-shop-1.onrender.com/api";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -41,6 +41,11 @@ function authHeaders() {
 async function handleResponse(res) {
   const data = await res.json();
   if (!res.ok) {
+    if (res.status === 401 && (data.message.includes('Invalid token') || data.message.includes('expired') || data.message.includes('User no longer exists') || data.message.includes('No token'))) {
+      localStorage.removeItem("mt_jwt");
+      localStorage.removeItem("mt_user");
+      window.location.reload();
+    }
     throw new Error(data.message || `Request failed (${res.status})`);
   }
   return data;

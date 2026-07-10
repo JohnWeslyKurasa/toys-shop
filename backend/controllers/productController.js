@@ -63,8 +63,10 @@ exports.updateProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
-    if (req.body.images && req.body.images.length > 0) {
+    if (req.body.images && req.body.images.length > 0 && !req.body.image) {
       req.body.image = req.body.images[0];
+    } else if (req.body.image && (!req.body.images || req.body.images.length === 0)) {
+      req.body.images = [req.body.image];
     }
 
     if (req.body.isNew !== undefined) {

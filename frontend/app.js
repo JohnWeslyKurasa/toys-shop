@@ -40,6 +40,7 @@ const DEFAULT_PRODUCTS = [
     originalPrice: 1999,
     category: "Toys > Educational Toys",
     image: "assets/product_toy_blocks.png",
+    images: ["assets/product_toy_blocks.png", "assets/product_baby_dress.png", "assets/product_swaddle.png"],
     description: "Toxin-free, organic maple wooden block set in lovely pastel yellow, cream, and soft orange hues. Promotes tactile learning, motor skills, and creative assembly for babies and toddlers.",
     rating: 4.9,
     inStock: true,
@@ -495,7 +496,7 @@ const elements = {
   ownerDashboardModal: document.getElementById("ownerDashboardModal"),
   closeOwnerDashboardBtn: document.getElementById("closeOwnerDashboardBtn"),
   addNewProductBtn: document.getElementById("addNewProductBtn"),
-  addNewSlideBtn: document.createElement("button"),
+  addNewSlideBtn: document.getElementById("addNewSlideBtn"),
   ownerLogoutBtn: document.getElementById("ownerLogoutBtn"),
   productFormPanel: document.getElementById("productFormPanel"),
   formPanelTitle: document.getElementById("formPanelTitle"),
@@ -507,6 +508,8 @@ const elements = {
   prodOriginalPrice: document.getElementById("prodOriginalPrice"),
   prodImage: document.getElementById("prodImage"),
   prodImages: document.getElementById("prodImages"),
+  additionalImagesContainer: document.getElementById("additionalImagesContainer"),
+  addAnotherImageBtn: document.getElementById("addAnotherImageBtn"),
   prodStock: document.getElementById("prodStock"),
   prodAgeGroup: document.getElementById("prodAgeGroup"),
   prodDesc: document.getElementById("prodDesc"),
@@ -519,10 +522,8 @@ const elements = {
   // Dashboard Tabs & sections
   tabManageProducts: document.getElementById("tabManageProducts"),
   tabManageCategories: document.getElementById("tabManageCategories"),
-  tabManageSlides: document.createElement("button"),
   productsDashboardSection: document.getElementById("productsDashboardSection"),
   categoriesDashboardSection: document.getElementById("categoriesDashboardSection"),
-  slidesDashboardSection: document.createElement("div"),
   addNewCategoryBtn: document.getElementById("addNewCategoryBtn"),
   adminCategoriesList: document.getElementById("adminCategoriesList"),
   categoryFormPanel: document.getElementById("categoryFormPanel"),
@@ -534,22 +535,6 @@ const elements = {
   editSubcategoryId: document.getElementById("editSubcategoryId"),
   subcatParentId: document.getElementById("subcatParentId"),
   cancelSubcatFormBtn: document.getElementById("cancelSubcatFormBtn"),
-  slideFormPanel: document.createElement("div"),
-  slideFormPanelTitle: document.createElement("div"),
-  slideManageForm: document.createElement("form"),
-  editSlideId: document.createElement("input"),
-  slideTitleInput: document.createElement("input"),
-  slideBadgeTextInput: document.createElement("input"),
-  slideBadgeStyleInput: document.createElement("input"),
-  slideBgStyleInput: document.createElement("input"),
-  slideIllustrationInput: document.createElement("input"),
-  slideImageUrlGroup: document.createElement("div"),
-  slideImageUrlInput: document.createElement("input"),
-  slideCtaTextInput: document.createElement("input"),
-  slideCtaCategoryInput: document.createElement("input"),
-  slideSubtitleInput: document.createElement("input"),
-  cancelSlideFormBtn: document.createElement("button"),
-  adminSlidesTableBody: document.createElement("tbody"),
 
   // Forms & Newsletter
   newsletterForm: document.getElementById("newsletterForm"),
@@ -682,12 +667,10 @@ const DEFAULT_CATEGORIES_DATA = Object.keys(CATEGORY_DETAILS).map((groupName, i)
 }));
 
 // Initialize Application
-window.addEventListener("DOMContentLoaded", async () => {
+async function initApp() {
   // 1. Hide Loader
-  setTimeout(() => {
-    elements.loader.style.opacity = "0";
-    elements.loader.style.visibility = "hidden";
-  }, 600);
+  elements.loader.style.opacity = "0";
+  elements.loader.style.visibility = "hidden";
 
   // Initialize Notifications
   initNotifications();
@@ -769,8 +752,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   window.openQuickView = openQuickView;
   window.editProduct = editProduct;
   window.deleteProduct = deleteProduct;
-  window.editSlide = editSlide;
-  window.deleteSlide = deleteSlide;
   window.changeOrderStatus = changeOrderStatus;
 
   // 7. Render & Bind Primary Categories
@@ -837,7 +818,13 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Initial call for static HTML elements
   window.observeFadeElements();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // Interactive Cursor Sparkle Trail Manager - Completely Removed as requested
 
@@ -1143,6 +1130,46 @@ function setupEventListeners() {
   elements.prodImage.addEventListener("blur", () => {
     elements.prodImage.value = cleanImageUrl(elements.prodImage.value);
   });
+  // Helper for dynamic extra images
+  window.createExtraImageInput = (value = "") => {
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.gap = "8px";
+    
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "extra-image-input";
+    input.placeholder = "e.g. https://res.cloudinary.com/...";
+    input.value = value;
+    input.style.flex = "1";
+    input.style.border = "2px solid var(--white)";
+    input.style.padding = "10px 14px";
+    input.style.borderRadius = "var(--border-radius-md)";
+    input.style.outline = "none";
+    input.addEventListener("blur", () => { input.value = cleanImageUrl(input.value); });
+    
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "×";
+    removeBtn.style.background = "var(--accent-red)";
+    removeBtn.style.color = "white";
+    removeBtn.style.border = "none";
+    removeBtn.style.borderRadius = "var(--border-radius-md)";
+    removeBtn.style.width = "40px";
+    removeBtn.style.cursor = "pointer";
+    removeBtn.style.fontWeight = "bold";
+    removeBtn.style.fontSize = "1.2rem";
+    removeBtn.addEventListener("click", () => { wrapper.remove(); });
+    
+    wrapper.appendChild(input);
+    wrapper.appendChild(removeBtn);
+    if(elements.additionalImagesContainer) elements.additionalImagesContainer.appendChild(wrapper);
+  };
+
+  if (elements.addAnotherImageBtn) {
+    elements.addAnotherImageBtn.addEventListener("click", () => window.createExtraImageInput());
+  }
+
   // Dashboard Add/Edit Form submit handler
   elements.productManageForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1170,9 +1197,11 @@ function setupEventListeners() {
     const originalPriceInput = elements.prodOriginalPrice.value;
     const originalPrice = originalPriceInput ? parseFloat(originalPriceInput) : null;
     const image = cleanImageUrl(elements.prodImage.value);
-    const imagesValue = elements.prodImages.value || "";
-    const images = imagesValue.split("\n")
-      .map(url => cleanImageUrl(url))
+    
+    // Gather extra images
+    const extraInputs = Array.from(document.querySelectorAll('.extra-image-input'));
+    const images = extraInputs
+      .map(input => cleanImageUrl(input.value))
       .filter(url => url !== "");
     
     const newProd = {
@@ -1205,6 +1234,7 @@ function setupEventListeners() {
       elements.productFormPanel.style.display = "none";
       elements.addNewProductBtn.style.display = "block";
       elements.productManageForm.reset();
+      if(elements.additionalImagesContainer) elements.additionalImagesContainer.innerHTML = "";
       renderAdminProductsTable();
       renderCategoryGroups();
     } catch (err) {
@@ -1216,18 +1246,15 @@ function setupEventListeners() {
   elements.tabManageProducts.addEventListener("click", () => {
     elements.tabManageProducts.classList.add("active");
     elements.tabManageCategories.classList.remove("active");
-    elements.tabManageSlides.classList.remove("active");
     elements.tabManageOrders.classList.remove("active");
     if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.productsDashboardSection.style.display = "flex";
     elements.categoriesDashboardSection.style.display = "none";
-    elements.slidesDashboardSection.style.display = "none";
     elements.ordersDashboardSection.style.display = "none";
     if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewProductBtn.style.display = "block";
     elements.addNewCategoryBtn.style.display = "none";
-    elements.addNewSlideBtn.style.display = "none";
-    elements.slideFormPanel.style.display = "none";
+    elements.productFormPanel.style.display = "none";
     elements.categoryFormPanel.style.display = "none";
     elements.subcategoryFormPanel.style.display = "none";
   });
@@ -1235,132 +1262,34 @@ function setupEventListeners() {
   elements.tabManageCategories.addEventListener("click", () => {
     elements.tabManageCategories.classList.add("active");
     elements.tabManageProducts.classList.remove("active");
-    elements.tabManageSlides.classList.remove("active");
     elements.tabManageOrders.classList.remove("active");
     if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.categoriesDashboardSection.style.display = "flex";
     elements.productsDashboardSection.style.display = "none";
-    elements.slidesDashboardSection.style.display = "none";
     elements.ordersDashboardSection.style.display = "none";
     if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewCategoryBtn.style.display = "block";
     elements.addNewProductBtn.style.display = "none";
-    elements.addNewSlideBtn.style.display = "none";
-    elements.productFormPanel.style.display = "none";
-    elements.slideFormPanel.style.display = "none";
-    renderAdminCategoriesTable();
-  });
-
-  elements.tabManageSlides.addEventListener("click", () => {
-    elements.tabManageSlides.classList.add("active");
-    elements.tabManageProducts.classList.remove("active");
-    elements.tabManageCategories.classList.remove("active");
-    elements.tabManageOrders.classList.remove("active");
-    if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
-    elements.slidesDashboardSection.style.display = "flex";
-    elements.productsDashboardSection.style.display = "none";
-    elements.categoriesDashboardSection.style.display = "none";
-    elements.ordersDashboardSection.style.display = "none";
-    if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
-    elements.addNewSlideBtn.style.display = "block";
-    elements.addNewProductBtn.style.display = "none";
-    elements.addNewCategoryBtn.style.display = "none";
     elements.productFormPanel.style.display = "none";
     elements.categoryFormPanel.style.display = "none";
-    elements.subcategoryFormPanel.style.display = "none";
-    renderAdminSlidesTable();
+    renderAdminCategoriesTable();
   });
 
   elements.tabManageOrders.addEventListener("click", () => {
     elements.tabManageOrders.classList.add("active");
     elements.tabManageProducts.classList.remove("active");
     elements.tabManageCategories.classList.remove("active");
-    elements.tabManageSlides.classList.remove("active");
     if(document.getElementById('tabManageNotifications')) document.getElementById('tabManageNotifications').classList.remove("active");
     elements.ordersDashboardSection.style.display = "flex";
     elements.productsDashboardSection.style.display = "none";
     elements.categoriesDashboardSection.style.display = "none";
-    elements.slidesDashboardSection.style.display = "none";
     if(document.getElementById('notificationsDashboardSection')) document.getElementById('notificationsDashboardSection').style.display = "none";
     elements.addNewProductBtn.style.display = "none";
     elements.addNewCategoryBtn.style.display = "none";
-    elements.addNewSlideBtn.style.display = "none";
     elements.productFormPanel.style.display = "none";
-    elements.slideFormPanel.style.display = "none";
     elements.categoryFormPanel.style.display = "none";
     elements.subcategoryFormPanel.style.display = "none";
     renderAdminOrdersTable();
-  });
-
-  // Slide Form toggles
-  elements.addNewSlideBtn.addEventListener("click", () => {
-    elements.slideFormPanel.style.display = "block";
-    elements.addNewSlideBtn.style.display = "none";
-    elements.slideFormPanelTitle.textContent = "Add New Slide Banner";
-    
-    // Clear form
-    elements.editSlideId.value = "";
-    elements.slideManageForm.reset();
-    elements.slideImageUrlGroup.style.display = "none";
-  });
-
-  elements.cancelSlideFormBtn.addEventListener("click", () => {
-    elements.slideFormPanel.style.display = "none";
-    elements.addNewSlideBtn.style.display = "block";
-  });
-
-  elements.slideIllustrationInput.addEventListener("change", (e) => {
-    if (e.target.value === "custom" || e.target.value === "custom-full") {
-      elements.slideImageUrlGroup.style.display = "flex";
-    } else {
-      elements.slideImageUrlGroup.style.display = "none";
-    }
-  });
-  elements.slideImageUrlInput.addEventListener("blur", () => {
-    elements.slideImageUrlInput.value = cleanImageUrl(elements.slideImageUrlInput.value);
-  });
-
-  // Slide Manage Form submit
-  elements.slideManageForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    
-    const slideIdVal = elements.editSlideId.value;
-    const slideData = {
-      title: elements.slideTitleInput.value.trim(),
-      badgeText: elements.slideBadgeTextInput.value.trim(),
-      badgeStyle: elements.slideBadgeStyleInput.value,
-      bgStyle: elements.slideBgStyleInput.value,
-      illustration: elements.slideIllustrationInput.value,
-      imageUrl: cleanImageUrl(elements.slideImageUrlInput.value),
-      ctaText: elements.slideCtaTextInput.value.trim(),
-      ctaCategory: elements.slideCtaCategoryInput.value,
-      subtitle: elements.slideSubtitleInput.value.trim()
-    };
-
-    if (!slideIdVal) {
-      // Create new slide
-      const nextId = SLIDES.length > 0 ? Math.max(...SLIDES.map(s => s.id)) + 1 : 1;
-      slideData.id = nextId;
-      SLIDES.push(slideData);
-      showToast("Slide banner added successfully.", "success");
-    } else {
-      // Edit existing slide
-      const id = parseInt(slideIdVal);
-      const idx = SLIDES.findIndex(s => s.id === id);
-      if (idx !== -1) {
-        slideData.id = id;
-        SLIDES[idx] = slideData;
-        showToast("Slide banner updated successfully.", "success");
-      }
-    }
-
-    saveSlidesToStorage();
-    elements.slideFormPanel.style.display = "none";
-    elements.addNewSlideBtn.style.display = "block";
-    
-    renderHeroSlideshow();
-    initHeroSlideshow();
-    renderAdminSlidesTable();
   });
 
   // User Auth Modal trigger from topbar
@@ -2104,7 +2033,8 @@ function renderProducts() {
           </svg>
         </button>
         <div class="product-img-wrapper" onclick="openQuickView('${prod._id || prod.id}')">
-          <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy">
+          <img src="${cleanImageUrl(prod.image)}" alt="${prod.name}" class="product-img" loading="lazy">
+          ${(() => { const uniqueImgs = [prod.image, ...(prod.images || [])].map(u => u ? cleanImageUrl(u.trim()) : "").filter((v,i,s) => v && s.indexOf(v) === i); return uniqueImgs.length > 1 ? `<span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.65); color: white; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px; pointer-events: none; z-index: 2;">📷 ${uniqueImgs.length}</span>` : ''; })()}
           <div class="product-actions-overlay">
             <button class="product-overlay-btn" onclick="event.stopPropagation(); openQuickView('${prod._id || prod.id}')">Quick View</button>
           </div>
@@ -2452,7 +2382,7 @@ async function openQuickView(productId) {
 
   // Get all unique product images (primary first, then additional)
   const allImages = [prod.image, ...(prod.images || [])]
-    .map(url => url ? url.trim() : "")
+    .map(url => url ? cleanImageUrl(url.trim()) : "")
     .filter((val, index, self) => val !== "" && self.indexOf(val) === index);
 
   // 1. Pre-render Carousel navigation buttons
@@ -2472,11 +2402,11 @@ async function openQuickView(productId) {
   let thumbnailsHtml = "";
   if (allImages.length > 1) {
     const thumbsListHtml = allImages.map((img, idx) => `
-      <img class="carousel-thumb-img ${idx === 0 ? 'active' : ''}" src="${img}" data-index="${idx}" style="width: 54px; height: 54px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid ${idx === 0 ? 'var(--light-orange)' : 'transparent'}; background-color: var(--cream); transition: all 0.2s; box-shadow: var(--shadow-xs);">
+      <img class="carousel-thumb-img ${idx === 0 ? 'active' : ''}" src="${img}" data-index="${idx}" style="width: 72px; height: 72px; object-fit: contain; border-radius: 8px; cursor: pointer; border: 2px solid ${idx === 0 ? '#f97316' : '#e5e7eb'}; background-color: transparent; transition: all 0.2s ease; padding: 4px; flex-shrink: 0;">
     `).join('');
 
     thumbnailsHtml = `
-      <div class="carousel-thumbnails-row" style="display: flex; gap: 8px; justify-content: center; width: 100%; overflow-x: auto; padding: 6px 0; scrollbar-width: thin;">
+      <div class="carousel-thumbnails-col" style="display: flex; flex-direction: row; gap: 10px; max-width: 100%; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; flex-shrink: 0; align-self: center;">
         ${thumbsListHtml}
       </div>
     `;
@@ -2488,7 +2418,7 @@ async function openQuickView(productId) {
     const cardsListHtml = similarProds.map(p => `
       <div class="similar-product-card" onclick="openQuickView('${p._id || p.id}')" style="flex: 0 0 160px; background-color: var(--cream); border-radius: var(--border-radius-md); padding: 12px; cursor: pointer; text-align: center; border: 1px solid rgba(93,64,55,0.05); display: flex; flex-direction: column; justify-content: space-between; height: 230px;">
         <div style="width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background-color: white; border-radius: 6px; overflow: hidden; margin-bottom: 8px;">
-          <img src="${p.image}" alt="${p.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+          <img src="${cleanImageUrl(p.image)}" alt="${p.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
         </div>
         <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
           <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--dark-brown); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0;">${p.name}</h4>
@@ -2559,28 +2489,49 @@ async function openQuickView(productId) {
   elements.modalBodyContent.innerHTML = `
     <div class="quickview-main-details">
       <!-- Carousel Column -->
-      <div class="modal-img-col" style="padding: 30px; display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: flex-start;">
-        <div class="carousel-main-wrapper" style="position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background-color: var(--cream); border-radius: var(--border-radius-lg); overflow: hidden; border: 1px solid rgba(93,64,55,0.06); box-shadow: var(--shadow-sm);">
-          <img id="carouselMainImg" src="${allImages[0] || prod.image}" alt="${prod.name}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.2s ease;">
+      <div class="modal-img-col" style="padding: 30px; display: flex; flex-direction: column; gap: 16px; align-items: stretch; justify-content: flex-start;">
+        <div class="carousel-main-wrapper" style="position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background-color: transparent; overflow: hidden; box-shadow: none;">
+          <img id="carouselMainImg" src="${allImages[0] || cleanImageUrl(prod.image)}" alt="${prod.name}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.2s ease;">
           ${navButtonsHtml}
         </div>
         ${thumbnailsHtml}
       </div>
 
       <!-- Info Column -->
-      <div class="modal-info-col" style="padding: 30px;">
-        <span class="modal-category">${prod.category} ${prod.ageGroup && prod.ageGroup !== 'All' ? `• Age: ${prod.ageGroup} Yrs` : ''}</span>
-        <h2 class="modal-title" style="margin-bottom: 8px;">${prod.name}</h2>
-        <div class="modal-rating" style="margin-bottom: 12px;">
-          ${renderStars(prod.rating || 5.0)}
-          <span style="font-weight: bold; margin-left: 4px; color: var(--dark-brown);">${(prod.rating || 5.0).toFixed(1)}</span>
-          <span style="color: var(--light-brown); font-size: 0.85rem; margin-left: 8px;">(${prod.reviews ? prod.reviews.length : 0} reviews)</span>
+      <div class="modal-info-col" style="padding: 30px; display: flex; flex-direction: column; gap: 6px;">
+        <span class="modal-category" style="font-size: 0.8rem; color: var(--light-brown); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${prod.category} ${prod.ageGroup && prod.ageGroup !== 'All' ? `• Age: ${prod.ageGroup} Yrs` : ''}</span>
+        <h2 class="modal-title" style="margin-bottom: 4px; font-size: 1.3rem; font-weight: 700; color: var(--dark-brown); line-height: 1.4;">${prod.brand || 'Mother & Toddler'} <span style="font-weight: 400; color: #333;">${prod.name}</span></h2>
+        
+        <div class="modal-rating" style="margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span style="background: #388e3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">${(prod.rating || 5.0).toFixed(1)} ★</span>
+          <span style="color: var(--light-brown); font-size: 0.85rem; font-weight: 600;">(${prod.reviews ? prod.reviews.length : 0} Reviews)</span>
         </div>
-        <div class="modal-price-row" style="margin-bottom: 12px;">
-          <span class="modal-price" style="font-size: 1.5rem; color: var(--dark-brown);">₹${prod.price.toLocaleString('en-IN')}</span>
-          ${prod.originalPrice ? `<span class="product-original-price" style="font-size: 1.1rem;">₹${prod.originalPrice.toLocaleString('en-IN')}</span>` : ''}
+
+        <!-- Price Block - FirstCry Style -->
+        <div style="background: #fafafa; border-radius: 10px; padding: 16px; border: 1px solid #eee; margin-bottom: 6px;">
+          <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+            <span style="font-size: 1.8rem; font-weight: 800; color: var(--dark-brown);">₹${prod.price.toLocaleString('en-IN')}</span>
+            ${prod.originalPrice ? `<span style="font-size: 1rem; color: #999; font-weight: 400;">MRP: <span style="text-decoration: line-through;">₹${prod.originalPrice.toLocaleString('en-IN')}</span></span>` : ''}
+            ${prod.originalPrice && prod.originalPrice > prod.price ? `<span style="font-size: 0.95rem; font-weight: 700; color: #388e3c;">${Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)}% OFF</span>` : ''}
+          </div>
+          <p style="font-size: 0.78rem; color: #888; margin: 6px 0 0 0;">Sale price inclusive of all taxes (with applicable GST benefits)</p>
         </div>
-        <p class="modal-desc" style="margin-bottom: 16px; font-size: 0.9rem;">${prod.description}</p>
+
+        <p class="modal-desc" style="margin-bottom: 12px; font-size: 0.9rem; color: #555; line-height: 1.6;">${prod.description}</p>
+        
+        ${prod.ageGroup && prod.ageGroup !== 'All' ? `
+        <div style="margin-bottom: 8px;">
+          <span style="font-weight: 700; font-size: 0.85rem; color: var(--dark-brown);">Age Group</span>
+          <div style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+            <span style="padding: 6px 16px; border: 2px solid var(--light-orange); border-radius: 6px; font-size: 0.82rem; font-weight: 700; color: var(--dark-brown); background: var(--soft-yellow);">${prod.ageGroup} Yrs</span>
+          </div>
+        </div>
+        ` : ''}
+
+        <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: ${prod.inStock ? '#e8f5e9' : '#fbe9e7'}; border-radius: 8px; margin-bottom: 6px;">
+          <svg style="width: 18px; height: 18px; fill: ${prod.inStock ? '#388e3c' : '#d32f2f'};" viewBox="0 0 24 24"><path d="${prod.inStock ? 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' : 'M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z'}"/></svg>
+          <span style="font-weight: 700; font-size: 0.85rem; color: ${prod.inStock ? '#388e3c' : '#d32f2f'};">${prod.inStock ? 'In Stock — Ready to Ship' : 'Currently Out of Stock'}</span>
+        </div>
         
         <div class="modal-actions" style="display: flex; gap: 10px; align-items: stretch; margin-top: 10px;">
           ${prod.inStock ? `
@@ -2589,8 +2540,8 @@ async function openQuickView(productId) {
               <input type="text" id="modalQtyVal" value="1" readonly>
               <button id="modalQtyInc">+</button>
             </div>
-            <button class="btn" id="modalAddToCartBtn" style="flex: 1; background: var(--soft-yellow); color: var(--dark-brown); font-weight: 700; border-radius: 30px; border: 2px solid var(--light-orange); transition: transform 0.2s;">Add to Cart</button>
-            <button class="btn" id="modalBuyNowBtn" style="flex: 1; background: linear-gradient(to right, var(--deep-orange), var(--light-orange)); color: white; font-weight: 700; border-radius: 30px; border: none; box-shadow: var(--shadow-md); transition: transform 0.2s;">Buy Now</button>
+            <button class="btn" id="modalAddToCartBtn" style="flex: 1; background: var(--soft-yellow); color: var(--dark-brown); font-weight: 700; border-radius: 30px; border: 2px solid var(--light-orange); transition: transform 0.2s;">🛒 Add to Cart</button>
+            <button class="btn" id="modalBuyNowBtn" style="flex: 1; background: linear-gradient(to right, var(--deep-orange), var(--light-orange)); color: white; font-weight: 700; border-radius: 30px; border: none; box-shadow: var(--shadow-md); transition: transform 0.2s;">⚡ Buy Now</button>
           ` : `<span style="font-weight: 700; color: var(--accent-red); font-size: 1.1rem; padding: 6px 0;">Product Currently Sold Out</span>`}
         </div>
       </div>
@@ -2647,10 +2598,10 @@ async function openQuickView(productId) {
       // Toggle active states on thumbs
       thumbs.forEach((t, idx) => {
         if (idx === currentIndex) {
-          t.style.borderColor = "var(--light-orange)";
+          t.style.borderColor = "#f97316";
           t.classList.add("active");
         } else {
-          t.style.borderColor = "transparent";
+          t.style.borderColor = "#e5e7eb";
           t.classList.remove("active");
         }
       });
@@ -2768,21 +2719,17 @@ async function openQuickView(productId) {
 // Owner Dashboard UI Operations
 function openOwnerDashboard() {
   openModal(elements.ownerDashboardModal);
-  elements.prodCategory.innerHTML = ALL_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join("");
-  elements.slideCtaCategoryInput.innerHTML = ALL_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join("");
-  
+
   // Reset active dashboard tabs
   elements.tabManageProducts.classList.add("active");
-  elements.tabManageSlides.classList.remove("active");
+  elements.tabManageCategories.classList.remove("active");
   elements.tabManageOrders.classList.remove("active");
   elements.productsDashboardSection.style.display = "flex";
-  elements.slidesDashboardSection.style.display = "none";
+  elements.categoriesDashboardSection.style.display = "none";
   elements.ordersDashboardSection.style.display = "none";
   elements.addNewProductBtn.style.display = "block";
-  elements.addNewSlideBtn.style.display = "none";
   
   renderAdminProductsTable();
-  renderAdminSlidesTable();
   renderAdminOrdersTable();
 }
 
@@ -2862,7 +2809,13 @@ function editProduct(id) {
   elements.prodPrice.value = Math.round(prod.price);
   elements.prodOriginalPrice.value = prod.originalPrice ? Math.round(prod.originalPrice) : "";
   elements.prodImage.value = prod.image || "";
-  elements.prodImages.value = (prod.images || []).join("\n");
+  
+  // Setup extra images
+  if(elements.additionalImagesContainer) elements.additionalImagesContainer.innerHTML = "";
+  if (prod.images && prod.images.length > 0) {
+    prod.images.forEach(img => window.createExtraImageInput(img));
+  }
+  
   elements.prodStock.value = prod.inStock ? "true" : "false";
   elements.prodAgeGroup.value = prod.ageGroup || "All";
   elements.prodDesc.value = prod.description || "";
@@ -3160,11 +3113,13 @@ function renderHeroSlideshow() {
         <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background: ${gradient};">
           <div class="hero-slide-grid container">
             <div class="hero-slide-content">
-              <span class="slide-badge" style="${badgeStyle}">${slide.badgeText}</span>
-              <h1 class="slide-title">${slide.title}</h1>
-              <p class="slide-subtitle">${slide.subtitle}</p>
-              <div class="slide-ctas">
-                <a href="#products" onclick="app.filterCategory('${slide.ctaCategory}')" class="btn btn-primary" style="${btnStyle}">${slide.ctaText}</a>
+              <div class="hero-glass-card">
+                <span class="slide-badge" style="${badgeStyle}">${slide.badgeText}</span>
+                <h1 class="slide-title">${slide.title}</h1>
+                <p class="slide-subtitle">${slide.subtitle}</p>
+                <div class="slide-ctas">
+                  <a href="#products" onclick="app.filterCategory('${slide.ctaCategory}')" class="btn btn-primary" style="${btnStyle}">${slide.ctaText}</a>
+                </div>
               </div>
             </div>
             <div class="hero-slide-image animated-hero-illustration">
@@ -3184,109 +3139,7 @@ function renderHeroSlideshow() {
   elements.slidesDots.innerHTML = dotsHtml;
 }
 
-// Render slides table in owner dashboard
-function renderAdminSlidesTable() {
-  if (SLIDES.length === 0) {
-    elements.adminSlidesTableBody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align: center; padding: 24px; color: var(--light-brown);">
-          No slideshow banners configured. Tap "Add Banner" to create one!
-        </td>
-      </tr>
-    `;
-    return;
-  }
 
-  elements.adminSlidesTableBody.innerHTML = SLIDES.map(slide => {
-    let badgeColor = "";
-    if (slide.badgeStyle === "yellow") badgeColor = "background-color: var(--soft-yellow); color: var(--dark-brown);";
-    else if (slide.badgeStyle === "red") badgeColor = "background-color: var(--accent-red); color: white;";
-    else if (slide.badgeStyle === "blue") badgeColor = "background-color: #00acc1; color: white;";
-
-    let illustrationLabel = "";
-    if (slide.illustration === "baby-playing") illustrationLabel = "Baby Clothing Portrait";
-    else if (slide.illustration === "mother-holding") illustrationLabel = "Mother Cradling Portrait";
-    else if (slide.illustration === "baby-crawling") illustrationLabel = "Baby Feeding Cup Portrait";
-    else if (slide.illustration === "custom") illustrationLabel = `Custom: ${slide.imageUrl}`;
-
-    return `
-      <tr style="border-bottom: 1px solid rgba(93, 64, 55, 0.05);">
-        <td style="padding: 12px;">
-          <span class="slide-badge" style="font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; font-weight: 700; ${badgeColor}">
-            ${slide.badgeText}
-          </span>
-        </td>
-        <td style="padding: 12px; max-width: 300px;">
-          <div style="font-weight: 600; color: var(--dark-brown); font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            ${slide.title}
-          </div>
-          <div style="font-size: 0.75rem; color: var(--light-brown); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            ${slide.subtitle}
-          </div>
-        </td>
-        <td style="padding: 12px; font-size: 0.85rem; color: var(--light-brown);">
-          ${illustrationLabel}
-        </td>
-        <td style="padding: 12px; font-size: 0.85rem; text-transform: capitalize; color: var(--light-brown);">
-          ${slide.bgStyle} theme
-        </td>
-        <td style="padding: 12px; text-align: center; white-space: nowrap;">
-          <button class="admin-action-btn admin-btn-edit" onclick="editSlide(${slide.id})" title="Edit Slide">
-            <svg viewBox="0 0 24 24"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z"/></svg>
-          </button>
-          <button class="admin-action-btn admin-btn-delete" onclick="deleteSlide(${slide.id})" title="Delete Slide">
-            <svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join("");
-}
-
-// Edit existing slide banner
-function editSlide(id) {
-  const slide = SLIDES.find(s => s.id === id);
-  if (!slide) return;
-
-  elements.slideFormPanel.style.display = "block";
-  elements.addNewSlideBtn.style.display = "none";
-  elements.slideFormPanelTitle.textContent = "Edit Slide Banner Details";
-
-  elements.editSlideId.value = slide.id;
-  elements.slideTitleInput.value = slide.title;
-  elements.slideBadgeTextInput.value = slide.badgeText;
-  elements.slideBadgeStyleInput.value = slide.badgeStyle;
-  elements.slideBgStyleInput.value = slide.bgStyle;
-  elements.slideIllustrationInput.value = slide.illustration;
-  elements.slideImageUrlInput.value = slide.imageUrl || "";
-  elements.slideCtaTextInput.value = slide.ctaText;
-  elements.slideCtaCategoryInput.value = slide.ctaCategory;
-  elements.slideSubtitleInput.value = slide.subtitle;
-
-  if (slide.illustration === "custom") {
-    elements.slideImageUrlGroup.style.display = "flex";
-  } else {
-    elements.slideImageUrlGroup.style.display = "none";
-  }
-
-  elements.slideFormPanel.scrollIntoView({ behavior: 'smooth' });
-}
-
-// Delete slide banner
-function deleteSlide(id) {
-  const slide = SLIDES.find(s => s.id === id);
-  if (!slide) return;
-
-  if (confirm(`Are you sure you want to remove the slide banner "${slide.title}"?`)) {
-    SLIDES = SLIDES.filter(s => s.id !== id);
-    saveSlidesToStorage();
-    showToast("Slide banner deleted.", "error");
-
-    renderHeroSlideshow();
-    initHeroSlideshow();
-    renderAdminSlidesTable();
-  }
-}
 
 // Render orders table in Owner Dashboard — MongoDB only
 async function renderAdminOrdersTable() {
@@ -3749,8 +3602,8 @@ elements.categoryManageForm.addEventListener('submit', async (e) => {
   const data = {
     name: document.getElementById("catName").value,
     icon: document.getElementById("catIcon").value,
-    image: document.getElementById("catImage").value,
-    bannerImage: document.getElementById("catBannerImage").value,
+    image: cleanImageUrl(document.getElementById("catImage").value),
+    bannerImage: cleanImageUrl(document.getElementById("catBannerImage").value),
     description: document.getElementById("catDescription").value,
     metaTitle: document.getElementById("catMetaTitle").value,
     metaDescription: document.getElementById("catMetaDescription").value,
@@ -3823,7 +3676,7 @@ elements.subcategoryManageForm.addEventListener('submit', async (e) => {
   const data = {
     categoryId: elements.subcatParentId.value,
     name: document.getElementById("subcatName").value,
-    image: document.getElementById("subcatImage").value,
+    image: cleanImageUrl(document.getElementById("subcatImage").value),
     description: document.getElementById("subcatDescription").value,
     isActive: document.getElementById("subcatIsActive").checked,
   };
