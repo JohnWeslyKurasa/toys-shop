@@ -537,8 +537,7 @@ const elements = {
   cancelSubcatFormBtn: document.getElementById("cancelSubcatFormBtn"),
 
   // Forms & Newsletter
-  newsletterForm: document.getElementById("newsletterForm"),
-  newsletterEmail: document.getElementById("newsletterEmail"),
+
   toastContainer: document.getElementById("toastContainer"),
 
   // User Auth Modal Elements
@@ -1690,15 +1689,7 @@ function setupEventListeners() {
     }
   });
 
-  // Newsletter Form
-  elements.newsletterForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = elements.newsletterEmail.value.trim();
-    if (email) {
-      showToast("Thank you for subscribing! Check your inbox soon.", "success");
-      elements.newsletterEmail.value = "";
-    }
-  });
+
 }
 
 // Render category lists in sidebar nav dynamically
