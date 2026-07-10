@@ -6,7 +6,12 @@ function showToast(message, type = 'success') {
 let socket = null;
 let authToken = localStorage.getItem("mt_jwt") || null; // Fixed key
 let isInitialized = false;
-const BASE_URL = import.meta.env.VITE_API_URL || "https://toys-shop-1.onrender.com/api";
+let BASE_URL = "https://toys-shop-1.onrender.com/api";
+try {
+  if (import.meta && import.meta.env && import.meta.env.VITE_API_URL) {
+    BASE_URL = import.meta.env.VITE_API_URL;
+  }
+} catch (e) {}
 
 export function initNotifications() {
   if (isInitialized) return;
